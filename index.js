@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 const path = require("path");
 const fs = require("fs");
 const inquirer = require("inquirer");
@@ -8,7 +7,7 @@ const minimist = require("minimist");
 const uniq = require("lodash/uniq");
 const flatten = require("lodash/flatten");
 
-const argv = require("minimist")(process.argv.slice(2));
+const argv = require("minimist")(process.argv.slice(1));
 const ui = new inquirer.ui.BottomBar();
 
 let bottomMessageUpdateId = null;
@@ -59,9 +58,9 @@ inquirer.registerPrompt(
   require("inquirer-autocomplete-prompt")
 );
 
-(async () => {
+const run = async () => {
   "use strict";
-  const [dir] = argv._;
+  const dir = argv._.pop();
   const { resolve, basename } = path;
   const projectName = basename(dir);
   const packagesDir = resolve(dir || ".", "packages");
@@ -197,4 +196,6 @@ inquirer.registerPrompt(
       endMessage: chalk.green(`Commit created ✓`)
     });
   }
-})();
+};
+
+module.exports = { run };
