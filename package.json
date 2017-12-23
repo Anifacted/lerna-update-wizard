@@ -1,0 +1,16 @@
+{
+  "name": "lerna-update-wizard",
+  "bin": {
+    "lernaupdate": "./index"
+  },
+  "version": "0.0.1",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "^2.3.0",
+    "inquirer": "^4.0.1",
+    "inquirer-autocomplete-prompt": "^0.12.1",
+    "lodash": "^4.17.4",
+    "minimist": "^1.2.0"
+  }
+}
