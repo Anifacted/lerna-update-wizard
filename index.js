@@ -60,8 +60,8 @@ inquirer.registerPrompt(
 
 const run = async () => {
   "use strict";
-  const dir = argv._[0] || ".";
   const { resolve, basename } = path;
+  const dir = argv._[0] || ".";
   const packagesDir = resolve(dir, "packages");
   const projectPackage = require(resolve(dir, "package.json"));
   const projectName = projectPackage.name;
@@ -130,12 +130,7 @@ const run = async () => {
       name: "targetVersion",
       message: "Select version to install:",
       pageSize: 10,
-      choices: availableVersions
-        .map(version => ({
-          name: version,
-          value: version
-        }))
-        .reverse()
+      choices: availableVersions.map(version => ({ name: version })).reverse()
     }
   ]);
 
