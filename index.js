@@ -62,6 +62,18 @@ const run = async () => {
   "use strict";
   const { resolve, basename } = path;
   const dir = argv._[0] || ".";
+
+  const readPackageErr = await new Promise(cb =>
+    fs.stat(resolve(dir, "package.json"), cb)
+  );
+
+  if (readPackageErr) {
+    ui.log.write(
+      chalk.red.bold("No 'package.json' found in specified directory")
+    );
+    process.exit();
+  }
+
   const packagesDir = resolve(dir, "packages");
   const projectPackage = require(resolve(dir, "package.json"));
   const projectName = projectPackage.name;
