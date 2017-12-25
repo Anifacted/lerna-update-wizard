@@ -17,18 +17,16 @@ const showBottomMessage = (message = "") => {
   const chars = "/-\\|";
   let index = 0;
 
-  if (message === "" || message !== bottomMessage) {
+  if (message !== bottomMessage) {
     clearInterval(bottomMessageUpdateId);
-  }
 
-  if (message === "") {
-    ui.updateBottomBar("");
-  } else {
-    bottomMessageUpdateId = setInterval(() => {
-      if (chars.charAt(index) === "") index = 0;
+    if (message !== "") {
+      bottomMessageUpdateId = setInterval(() => {
+        if (chars.charAt(index) === "") index = 0;
 
-      ui.updateBottomBar(`${chars.charAt(index++)} ${message}`);
-    }, 100);
+        ui.updateBottomBar(`${chars.charAt(index++)} ${message}`);
+      }, 100);
+    }
   }
 
   bottomMessage = message;
