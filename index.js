@@ -7,7 +7,7 @@ const minimist = require("minimist");
 const uniq = require("lodash/uniq");
 const flatten = require("lodash/flatten");
 
-const argv = require("minimist")(process.argv.slice(1));
+const argv = require("minimist")(process.argv.slice(2));
 const ui = new inquirer.ui.BottomBar();
 
 let bottomMessageUpdateId = null;
@@ -60,10 +60,11 @@ inquirer.registerPrompt(
 
 const run = async () => {
   "use strict";
-  const dir = argv._.pop();
+  const dir = argv._[0] || ".";
   const { resolve, basename } = path;
-  const projectName = basename(dir);
-  const packagesDir = resolve(dir || ".", "packages");
+  const packagesDir = resolve(dir, "packages");
+  const projectPackage = require(resolve(dir, "package.json"));
+  const projectName = projectPackage.name;
   const packages = fs.readdirSync(packagesDir);
 
   const dependencies = packages.reduce(
@@ -78,6 +79,9 @@ const run = async () => {
     flatten(Object.values(dependencies).map(Object.keys))
   );
 
+  ui.log.write(`Starting update wizard for ${chalk.white.bold(projectName)}`);
+  ui.log.write("");
+
   const targetDependencyAnswers = await inquirer.prompt([
     {
       type: "autocomplete",
@@ -86,7 +90,9 @@ const run = async () => {
       pageSize: 15,
       source: (undefined, input) =>
         Promise.resolve(
-          allDependencies.filter(name => new RegExp(input).test(name))
+          input
+            ? allDependencies.filter(name => new RegExp(input).test(name))
+            : allDependencies
         )
     }
   ]);
