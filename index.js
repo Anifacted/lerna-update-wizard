@@ -32,6 +32,9 @@ const showBottomMessage = (message = "") => {
   bottomMessage = message;
 };
 
+const fileExists = async path =>
+  new Promise(resolve => fs.stat(path, err => resolve(!err)));
+
 const runCommand = async (options = {}) => {
   showBottomMessage(options.startMessage);
   const proc = spawn(options.cmd, { shell: true });
@@ -61,20 +64,24 @@ const run = async () => {
   const { resolve, basename } = path;
   const dir = argv._[0] || ".";
 
-  const readPackageErr = await new Promise(cb =>
-    fs.stat(resolve(dir, "package.json"), cb)
-  );
+  const projectPackagePath = resolve(dir, "package.json");
+  const packagesDir = resolve(dir, "packages");
 
-  if (readPackageErr) {
+  if (!await fileExists(projectPackagePath)) {
     ui.log.write(
       chalk.red.bold("No 'package.json' found in specified directory")
     );
     process.exit();
   }
 
-  const packagesDir = resolve(dir, "packages");
-  const projectPackage = require(resolve(dir, "package.json"));
-  const projectName = projectPackage.name;
+  if (!await fileExists(packagesDir)) {
+    ui.log.write(
+      chalk.red.bold("No 'packages/' directory found. Is this a lerna project?")
+    );
+    process.exit();
+  }
+
+  const { name: projectName } = require(projectPackagePath);
   const packages = fs.readdirSync(packagesDir);
 
   const dependencies = packages.reduce(
