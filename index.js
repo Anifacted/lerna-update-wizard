@@ -26,6 +26,8 @@ const showBottomMessage = (message = "") => {
 
         ui.updateBottomBar(`${chars.charAt(index++)} ${message}`);
       }, 100);
+    } else {
+      ui.updateBottomBar("");
     }
   }
 
