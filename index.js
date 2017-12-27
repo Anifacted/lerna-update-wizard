@@ -1,7 +1,7 @@
 const path = require("path");
 const fs = require("fs");
 const inquirer = require("inquirer");
-const { execSync, spawn } = require("child_process");
+const { spawn } = require("child_process");
 const chalk = require("chalk");
 const minimist = require("minimist");
 const uniq = require("lodash/uniq");
