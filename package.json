@@ -3,12 +3,12 @@
   "bin": {
     "lernaupdate": "./bin/lernaupdate"
   },
-  "version": "0.1.5",
+  "version": "0.1.6",
   "main": "index.js",
   "license": "MIT",
-  "repository" : {
-    "type" : "git",
-    "url" : "https://github.com/Anifacted/lerna-update-wizard"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Anifacted/lerna-update-wizard"
   },
   "dependencies": {
     "chalk": "^2.3.0",
