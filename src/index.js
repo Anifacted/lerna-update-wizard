@@ -15,7 +15,7 @@ inquirer.registerPrompt(
   require("inquirer-autocomplete-prompt")
 );
 
-const run = async args => {
+module.exports = async args => {
   "use strict";
 
   const argv = require("minimist")(args);
@@ -178,5 +178,3 @@ const run = async args => {
     });
   }
 };
-
-module.exports = { run };
