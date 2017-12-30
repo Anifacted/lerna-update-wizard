@@ -6,6 +6,10 @@
   "version": "0.1.5",
   "main": "index.js",
   "license": "MIT",
+  "repository" : {
+    "type" : "git",
+    "url" : "https://github.com/Anifacted/lerna-update-wizard"
+  },
   "dependencies": {
     "chalk": "^2.3.0",
     "inquirer": "^4.0.1",
