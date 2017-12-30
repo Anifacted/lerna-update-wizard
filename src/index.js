@@ -91,13 +91,11 @@ const run = async args => {
     }
   ]);
 
-  const json = await runCommand({
-    cmd: `yarn info ${targetDependency} versions --json`,
+  const availableVersions = await runCommand({
+    cmd: `npm info ${targetDependency} versions --json`,
     startMessage: `Fetching package information for "${targetDependency}"`,
     logOutput: false
   });
-
-  const { data: availableVersions } = JSON.parse(json);
 
   const targetVersionAnswers = await inquirer.prompt([
     {
@@ -105,7 +103,9 @@ const run = async args => {
       name: "targetVersion",
       message: "Select version to install:",
       pageSize: 10,
-      choices: availableVersions.map(version => ({ name: version })).reverse()
+      choices: JSON.parse(availableVersions)
+        .map(version => ({ name: version }))
+        .reverse()
     }
   ]);
 
@@ -113,9 +113,14 @@ const run = async args => {
   const { targetPackages } = targetPackagesAnswers;
 
   for (let pack of targetPackages) {
-    const installCmd = `yarn add ${targetDependency}@${targetVersion}`;
+    const packDir = resolve(packagesDir, pack);
+
+    const installCmd = (await fileExists(resolve(packDir, "yarn.lock")))
+      ? `yarn add ${targetDependency}@${targetVersion}`
+      : `npm install --save ${targetDependency}@${targetVersion}`;
+
     await runCommand({
-      cmd: `cd ${resolve(packagesDir, pack)} && ${installCmd}`,
+      cmd: `cd ${packDir} && ${installCmd}`,
       startMessage: `${chalk.white.bold(pack)}: ${installCmd}`,
       endMessage: chalk.green(`${pack} ✓`)
     });
