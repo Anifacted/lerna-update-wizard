@@ -1,69 +1,25 @@
 const path = require("path");
 const fs = require("fs");
 const inquirer = require("inquirer");
-const { spawn } = require("child_process");
 const chalk = require("chalk");
-const minimist = require("minimist");
+
 const uniq = require("lodash/uniq");
 const flatten = require("lodash/flatten");
 
-const argv = require("minimist")(process.argv.slice(2));
-const ui = new inquirer.ui.BottomBar();
-
-let bottomMessageUpdateId = null;
-let bottomMessage = "";
-
-const showBottomMessage = (message = "") => {
-  const chars = "/-\\|";
-  let index = 0;
-
-  if (message !== bottomMessage) {
-    clearInterval(bottomMessageUpdateId);
-
-    if (message !== "") {
-      bottomMessageUpdateId = setInterval(() => {
-        if (chars.charAt(index) === "") index = 0;
-
-        ui.updateBottomBar(`${chars.charAt(index++)} ${message}`);
-      }, 100);
-    } else {
-      ui.updateBottomBar("");
-    }
-  }
-
-  bottomMessage = message;
-};
-
-const fileExists = async path =>
-  new Promise(resolve => fs.stat(path, err => resolve(!err)));
-
-const runCommand = async (options = {}) => {
-  showBottomMessage(options.startMessage);
-  const proc = spawn(options.cmd, { shell: true });
-
-  if (options.logOutput !== false) proc.stdout.pipe(ui.log);
-
-  let data = "";
-  return new Promise((resolve, reject) => {
-    proc.stdout.on("data", d => (data = data + d.toString()));
-    proc.stdout.on("end", () => {
-      showBottomMessage("");
-      options.endMessage && ui.log.write(options.endMessage);
-      ui.log.write("");
-      resolve(data);
-    });
-    proc.stdout.on("error", reject);
-  });
-};
+const fileExists = require("./utils/fileExists");
+const ui = require("./utils/ui");
+const runCommand = require("./utils/runCommand");
 
 inquirer.registerPrompt(
   "autocomplete",
   require("inquirer-autocomplete-prompt")
 );
 
-const run = async () => {
+const run = async args => {
   "use strict";
-  const { resolve, basename } = path;
+
+  const argv = require("minimist")(args);
+  const { resolve } = path;
   const dir = argv._[0] || ".";
 
   const projectPackagePath = resolve(dir, "package.json");
@@ -107,7 +63,7 @@ const run = async () => {
       name: "targetDependency",
       message: "Select a dependency to upgrade:",
       pageSize: 15,
-      source: (undefined, input) =>
+      source: (_ignore_, input) =>
         Promise.resolve(
           input
             ? allDependencies.filter(name => new RegExp(input).test(name))

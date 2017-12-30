@@ -1,5 +1,3 @@
 #!/usr/bin/env node
 
-var cli = require("../index.js");
-
-cli.run();
+require("../src/index.js").run(process.argv.slice(2));
