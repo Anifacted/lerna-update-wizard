@@ -126,6 +126,19 @@ module.exports = async args => {
     });
   }
 
+  const userName = (
+    (await runCommand({
+      cmd: `git config --get github.user`,
+      logOutput: false
+    })) ||
+    (await runCommand({
+      cmd: `whoami`
+    })) ||
+    "upgrade"
+  )
+    .split("\n")
+    .shift();
+
   const gitAnswers = await inquirer.prompt([
     {
       type: "confirm",
@@ -137,7 +150,7 @@ module.exports = async args => {
       name: "gitBranchName",
       message: "Enter a name for your branch:",
       when: ({ shouldCreateGitBranch }) => shouldCreateGitBranch,
-      default: `upgrade-${targetDependency}-${targetVersion}`
+      default: `${userName}/${targetDependency}-${targetVersion}`
     },
     {
       type: "confirm",
