@@ -91,11 +91,13 @@ module.exports = async args => {
     }
   ]);
 
-  const availableVersions = await runCommand({
-    cmd: `npm info ${targetDependency} versions --json`,
-    startMessage: `Fetching package information for "${targetDependency}"`,
-    logOutput: false
-  });
+  const availableVersions = await runCommand(
+    `npm info ${targetDependency} versions --json`,
+    {
+      startMessage: `Fetching package information for "${targetDependency}"`,
+      logOutput: false
+    }
+  );
 
   const targetVersionAnswers = await inquirer.prompt([
     {
@@ -119,21 +121,15 @@ module.exports = async args => {
       ? `yarn add ${targetDependency}@${targetVersion}`
       : `npm install --save ${targetDependency}@${targetVersion}`;
 
-    await runCommand({
-      cmd: `cd ${packDir} && ${installCmd}`,
+    await runCommand(`cd ${packDir} && ${installCmd}`, {
       startMessage: `${chalk.white.bold(pack)}: ${installCmd}`,
       endMessage: chalk.green(`${pack} ✓`)
     });
   }
 
   const userName = (
-    (await runCommand({
-      cmd: `git config --get github.user`,
-      logOutput: false
-    })) ||
-    (await runCommand({
-      cmd: `whoami`
-    })) ||
+    (await runCommand("git config --get github.user", { logOutput: false })) ||
+    (await runCommand("whoami")) ||
     "upgrade"
   )
     .split("\n")
@@ -175,8 +171,7 @@ module.exports = async args => {
 
   if (shouldCreateGitBranch) {
     const createCmd = `git checkout -b ${gitBranchName}`;
-    await runCommand({
-      cmd: `cd ${dir} && ${createCmd}`,
+    await runCommand(`cd ${dir} && ${createCmd}`, {
       startMessage: `${chalk.white.bold(projectName)}: ${createCmd}`,
       endMessage: chalk.green(`Branch created ✓`)
     });
@@ -184,8 +179,7 @@ module.exports = async args => {
 
   if (shouldCreateGitCommit) {
     const createCmd = `git add . && git commit -m '${gitCommitMessage}'`;
-    await runCommand({
-      cmd: `cd ${dir} && ${createCmd}`,
+    await runCommand(`cd ${dir} && ${createCmd}`, {
       startMessage: `${chalk.white.bold(projectName)}: ${createCmd}`,
       endMessage: chalk.green(`Commit created ✓`)
     });

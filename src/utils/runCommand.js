@@ -2,9 +2,9 @@ const { spawn } = require("child_process");
 
 const ui = require("./ui");
 
-module.exports = async (options = {}) => {
+module.exports = async (cmd, options = {}) => {
   ui.logBottom(options.startMessage);
-  const proc = spawn(options.cmd, { shell: true });
+  const proc = spawn(cmd, { shell: true });
 
   if (options.logOutput !== false) proc.stdout.pipe(ui.log);
 
