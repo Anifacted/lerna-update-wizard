@@ -1,3 +1,25 @@
 #!/usr/bin/env node
 
-require("../src/index.js")(process.argv.slice(2));
+const meow = require("meow");
+
+const { input, flags } = meow(
+  `
+  Usage: lernaupdate <project-directory>
+
+  Options:
+    --dedupe, -d  List only dependencies that have a version conflict between one or more packages
+
+  Examples:
+    $ lernaupdate ./myproject --dedupe
+`,
+  {
+    flags: {
+      dedupe: {
+        type: "boolean",
+        alias: "d"
+      }
+    }
+  }
+);
+
+require("../src/index.js")({ input, flags });
