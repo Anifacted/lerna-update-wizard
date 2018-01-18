@@ -42,13 +42,18 @@ module.exports = async args => {
   const { name: projectName } = require(projectPackagePath);
   const packages = fs.readdirSync(packagesDir);
 
-  const dependencies = packages.reduce(
-    (prev, pack) => ({
+  const dependencies = packages.reduce((prev, pack) => {
+    const { dependencies, devDependencies } = require(resolve(
+      packagesDir,
+      pack,
+      "package.json"
+    ));
+
+    return {
       ...prev,
-      [pack]: require(resolve(packagesDir, pack, "package.json")).dependencies
-    }),
-    {}
-  );
+      [pack]: { ...dependencies, ...devDependencies }
+    };
+  }, {});
 
   const allDependencies = uniq(
     flatten(Object.values(dependencies).map(Object.keys))
