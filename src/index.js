@@ -2,28 +2,22 @@ const path = require("path");
 const fs = require("fs");
 const inquirer = require("inquirer");
 const chalk = require("chalk");
-
 const uniq = require("lodash/uniq");
-const flatten = require("lodash/flatten");
 
 const fileExists = require("./utils/fileExists");
 const ui = require("./utils/ui");
-const runCommand = require("./utils/runCommand");
 
 inquirer.registerPrompt(
   "autocomplete",
   require("inquirer-autocomplete-prompt")
 );
 
-module.exports = async args => {
-  "use strict";
-
-  const argv = require("minimist")(args);
+module.exports = async ({ input, flags }) => {
   const { resolve } = path;
-  const dir = argv._[0] || ".";
+  const projectDir = input.shift() || ".";
 
-  const projectPackagePath = resolve(dir, "package.json");
-  const packagesDir = resolve(dir, "packages");
+  const projectPackagePath = resolve(projectDir, "package.json");
+  const packagesDir = resolve(projectDir, "packages");
 
   if (!await fileExists(projectPackagePath)) {
     ui.log.write(
@@ -42,146 +36,65 @@ module.exports = async args => {
   const { name: projectName } = require(projectPackagePath);
   const packages = fs.readdirSync(packagesDir);
 
-  const dependencies = packages.reduce(
-    (prev, pack) => ({
+  const dependencies = packages.reduce((prev, pack) => {
+    const { dependencies, devDependencies } = require(resolve(
+      packagesDir,
+      pack,
+      "package.json"
+    ));
+
+    return {
       ...prev,
-      [pack]: require(resolve(packagesDir, pack, "package.json")).dependencies
-    }),
-    {}
-  );
+      [pack]: { ...dependencies, ...devDependencies }
+    };
+  }, {});
 
-  const allDependencies = uniq(
-    flatten(Object.values(dependencies).map(Object.keys))
-  );
+  let dependencyMap = packages.reduce((prev, pack) => {
+    const packDeps = dependencies[pack];
+    return {
+      ...prev,
+      ...Object.keys(packDeps).reduce((prev, dep) => {
+        const version = packDeps[dep];
+        const prevDep = prev[dep] || { packs: {}, versions: [] };
+        const versions = uniq([...prevDep.versions, version]);
 
-  ui.log.write(`Starting update wizard for ${chalk.white.bold(projectName)}`);
-  ui.log.write("");
+        let color = "grey";
+        const count = versions.length;
 
-  const targetDependencyAnswers = await inquirer.prompt([
-    {
-      type: "autocomplete",
-      name: "targetDependency",
-      message: "Select a dependency to upgrade:",
-      pageSize: 15,
-      source: (_ignore_, input) =>
-        Promise.resolve(
-          input
-            ? allDependencies.filter(name => new RegExp(input).test(name))
-            : allDependencies
-        )
-    }
-  ]);
+        if (count > 1) color = "yellow";
+        if (count > 3) color = "red";
 
-  const { targetDependency } = targetDependencyAnswers;
-
-  const targetPackagesAnswers = await inquirer.prompt([
-    {
-      type: "checkbox",
-      name: "targetPackages",
-      message: "Select packages to affect:",
-      pageSize: 15,
-      choices: packages.map(pack => {
-        const installedVersion = dependencies[pack][targetDependency];
         return {
-          name: `${pack} ${installedVersion ? `(${installedVersion})` : ""}`,
-          value: pack,
-          checked: !!installedVersion
+          ...prev,
+          [dep]: {
+            ...prevDep,
+            name: dep,
+            packs: { ...prevDep.packs, [pack]: version },
+            versions,
+            color
+          }
         };
-      })
-    }
-  ]);
+      }, prev)
+    };
+  }, {});
 
-  const availableVersions = await runCommand(
-    `npm info ${targetDependency} versions --json`,
-    {
-      startMessage: `Fetching package information for "${targetDependency}"`,
-      logOutput: false
-    }
-  );
-
-  const targetVersionAnswers = await inquirer.prompt([
-    {
-      type: "list",
-      name: "targetVersion",
-      message: "Select version to install:",
-      pageSize: 10,
-      choices: JSON.parse(availableVersions)
-        .map(version => ({ name: version }))
-        .reverse()
-    }
-  ]);
-
-  const { targetVersion } = targetVersionAnswers;
-  const { targetPackages } = targetPackagesAnswers;
-
-  for (let pack of targetPackages) {
-    const packDir = resolve(packagesDir, pack);
-
-    const installCmd = (await fileExists(resolve(packDir, "yarn.lock")))
-      ? `yarn add ${targetDependency}@${targetVersion}`
-      : `npm install --save ${targetDependency}@${targetVersion}`;
-
-    await runCommand(`cd ${packDir} && ${installCmd}`, {
-      startMessage: `${chalk.white.bold(pack)}: ${installCmd}`,
-      endMessage: chalk.green(`${pack} ✓`)
-    });
+  // filter out non-conflicted dependencies when deduping
+  if (flags.dedupe) {
+    dependencyMap = Object.values(dependencyMap)
+      .filter(({ versions }) => versions.length > 1)
+      .reduce(
+        (prev, { name }) => ({ ...prev, [name]: dependencyMap[name] }),
+        {}
+      );
   }
 
-  const userName = (
-    (await runCommand("git config --get github.user", { logOutput: false })) ||
-    (await runCommand("whoami")) ||
-    "upgrade"
-  )
-    .split("\n")
-    .shift();
-
-  const gitAnswers = await inquirer.prompt([
-    {
-      type: "confirm",
-      name: "shouldCreateGitBranch",
-      message: "Do you want to create a new git branch for the change?"
-    },
-    {
-      type: "input",
-      name: "gitBranchName",
-      message: "Enter a name for your branch:",
-      when: ({ shouldCreateGitBranch }) => shouldCreateGitBranch,
-      default: `${userName}/${targetDependency}-${targetVersion}`
-    },
-    {
-      type: "confirm",
-      name: "shouldCreateGitCommit",
-      message: "Do you want to create a new git commit for the change?"
-    },
-    {
-      type: "input",
-      name: "gitCommitMessage",
-      message: "Enter a git commit message:",
-      when: ({ shouldCreateGitCommit }) => shouldCreateGitCommit,
-      default: `Upgrade dependency: ${targetDependency}@${targetVersion}`
-    }
-  ]);
-
-  const {
-    shouldCreateGitBranch,
-    shouldCreateGitCommit,
-    gitBranchName,
-    gitCommitMessage
-  } = gitAnswers;
-
-  if (shouldCreateGitBranch) {
-    const createCmd = `git checkout -b ${gitBranchName}`;
-    await runCommand(`cd ${dir} && ${createCmd}`, {
-      startMessage: `${chalk.white.bold(projectName)}: ${createCmd}`,
-      endMessage: chalk.green(`Branch created ✓`)
-    });
-  }
-
-  if (shouldCreateGitCommit) {
-    const createCmd = `git add . && git commit -m '${gitCommitMessage}'`;
-    await runCommand(`cd ${dir} && ${createCmd}`, {
-      startMessage: `${chalk.white.bold(projectName)}: ${createCmd}`,
-      endMessage: chalk.green(`Commit created ✓`)
-    });
-  }
+  return require(`./wizards/upgrade.js`)({
+    dependencyMap,
+    projectName,
+    projectDir,
+    packagesDir,
+    packages,
+    resolve,
+    flags
+  });
 };
