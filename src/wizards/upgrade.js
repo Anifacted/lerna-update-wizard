@@ -189,10 +189,23 @@ module.exports = async ({
   }
 
   if (shouldCreateGitCommit) {
-    const createCmd = `git add . && git commit -m '${gitCommitMessage}'`;
+    const subMessage = targetPackages
+      .reduce((prev, pack) => {
+        const fromVersion = dependencyMap[targetDependency].packs[pack];
+
+        if (fromVersion === targetVersion) return prev;
+
+        return fromVersion
+          ? [...prev, `* ${pack}: ${fromVersion} →  ${targetVersion}`]
+          : [...prev, `* ${pack}: ${targetVersion}`];
+      }, [])
+      .join("\n");
+
+    const createCmd = `git add . && git commit -m '${gitCommitMessage}' -m '${subMessage}'`;
     await runCommand(`cd ${projectDir} && ${createCmd}`, {
       startMessage: `${chalk.white.bold(projectName)}: ${createCmd}`,
-      endMessage: chalk.green(`Commit created ✓`)
+      endMessage: chalk.green(`Commit created ✓`),
+      logOutput: false
     });
   }
 };
