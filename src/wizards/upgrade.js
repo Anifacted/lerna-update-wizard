@@ -203,7 +203,7 @@ module.exports = async ({
 
     const createCmd = `git add . && git commit -m '${gitCommitMessage}' -m '${subMessage}'`;
     await runCommand(`cd ${projectDir} && ${createCmd}`, {
-      startMessage: `${chalk.white.bold(projectName)}: ${createCmd}`,
+      startMessage: `${chalk.white.bold(projectName)}: git add . && git commit`,
       endMessage: chalk.green(`Commit created ✓`),
       logOutput: false
     });
