@@ -130,7 +130,7 @@ module.exports = async ({
 
     const packDir = resolve(packagesDir, pack);
 
-    const installCmd = (await fileExists(resolve(packDir, "yarn.lock")))
+    const installCmd = (await fileExists(resolve(projectDir, "yarn.lock")))
       ? `yarn add ${targetDependency}@${targetVersion}`
       : `npm install --save ${targetDependency}@${targetVersion}`;
 
