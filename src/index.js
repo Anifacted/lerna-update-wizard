@@ -19,14 +19,14 @@ module.exports = async ({ input, flags }) => {
   const projectPackagePath = resolve(projectDir, "package.json");
   const packagesDir = resolve(projectDir, "packages");
 
-  if (!await fileExists(projectPackagePath)) {
+  if (!(await fileExists(projectPackagePath))) {
     ui.log.write(
       chalk.red.bold("No 'package.json' found in specified directory")
     );
     process.exit();
   }
 
-  if (!await fileExists(packagesDir)) {
+  if (!(await fileExists(packagesDir))) {
     ui.log.write(
       chalk.red.bold("No 'packages/' directory found. Is this a lerna project?")
     );
@@ -35,6 +35,18 @@ module.exports = async ({ input, flags }) => {
 
   const { name: projectName } = require(projectPackagePath);
   const packages = fs.readdirSync(packagesDir);
+
+  const setSourceForDeps = (deps = [], source = "dependencies") =>
+    Object.keys(deps).reduce(
+      (prev, name) => ({
+        ...prev,
+        [name]: {
+          version: deps[name],
+          source
+        }
+      }),
+      {}
+    );
 
   const dependencies = packages.reduce((prev, pack) => {
     const { dependencies, devDependencies } = require(resolve(
@@ -45,7 +57,10 @@ module.exports = async ({ input, flags }) => {
 
     return {
       ...prev,
-      [pack]: { ...dependencies, ...devDependencies }
+      [pack]: {
+        ...setSourceForDeps(dependencies),
+        ...setSourceForDeps(devDependencies, "devDependencies")
+      }
     };
   }, {});
 
@@ -54,7 +69,7 @@ module.exports = async ({ input, flags }) => {
     return {
       ...prev,
       ...Object.keys(packDeps).reduce((prev, dep) => {
-        const version = packDeps[dep];
+        const { version, source } = packDeps[dep];
         const prevDep = prev[dep] || { packs: {}, versions: [] };
         const versions = uniq([...prevDep.versions, version]);
 
@@ -69,7 +84,7 @@ module.exports = async ({ input, flags }) => {
           [dep]: {
             ...prevDep,
             name: dep,
-            packs: { ...prevDep.packs, [pack]: version },
+            packs: { ...prevDep.packs, [pack]: { version, source } },
             versions,
             color
           }
