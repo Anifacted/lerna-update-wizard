@@ -64,12 +64,18 @@ module.exports = async ({
       name: "targetPackages",
       message: "Select packages to affect:",
       pageSize: 15,
-      choices: packages.map(pack => {
-        const installedVersion = dependencyMap[targetDependency].packs[pack];
+      choices: packages.map(depName => {
+        const { version, source } =
+          dependencyMap[targetDependency].packs[depName] || {};
+
+        const versionBit = version ? ` (${version})` : "";
+        const sourceBit =
+          source === "devDependencies" ? chalk.white(" (dev)") : "";
+
         return {
-          name: `${pack} ${installedVersion ? `(${installedVersion})` : ""}`,
-          value: pack,
-          checked: !!installedVersion
+          name: `${depName}${versionBit}${sourceBit}`,
+          value: depName,
+          checked: !!version
         };
       })
     }
@@ -119,24 +125,45 @@ module.exports = async ({
     }
   ]);
 
-  for (let pack of targetPackages) {
-    if (dependencyMap[targetDependency].packs[pack] === targetVersion) {
+  for (let depName of targetPackages) {
+    const { version, source } =
+      dependencyMap[targetDependency].packs[depName] || {};
+
+    if (version === targetVersion) {
       ui.log.write("");
       ui.log.write(`Already installed (${targetVersion})`);
-      ui.log.write(chalk.green(`${pack} ✓`));
+      ui.log.write(chalk.green(`${depName} ✓`));
       ui.log.write("");
       continue;
     }
 
-    const packDir = resolve(packagesDir, pack);
+    const packDir = resolve(packagesDir, depName);
 
-    const installCmd = (await fileExists(resolve(projectDir, "yarn.lock")))
-      ? `yarn add ${targetDependency}@${targetVersion}`
-      : `npm install --save ${targetDependency}@${targetVersion}`;
+    const dependencyManager = (await fileExists(
+      resolve(projectDir, "yarn.lock")
+    ))
+      ? "yarn"
+      : "npm";
+
+    const sourceParam = {
+      yarn: {
+        dependencies: "",
+        devDependencies: "--dev"
+      },
+      npm: {
+        dependencies: "--save",
+        devDependencies: "--save-dev"
+      }
+    }[dependencyManager][source || "dependencies"];
+
+    const installCmd =
+      dependencyManager === "yarn"
+        ? `yarn add ${sourceParam} ${targetDependency}@${targetVersion}`
+        : `npm install ${sourceParam} ${targetDependency}@${targetVersion}`;
 
     await runCommand(`cd ${packDir} && ${installCmd}`, {
-      startMessage: `${chalk.white.bold(pack)}: ${installCmd}`,
-      endMessage: chalk.green(`${pack} ✓`)
+      startMessage: `${chalk.white.bold(depName)}: ${installCmd}`,
+      endMessage: chalk.green(`${depName} ✓`)
     });
   }
 
@@ -190,14 +217,16 @@ module.exports = async ({
 
   if (shouldCreateGitCommit) {
     const subMessage = targetPackages
-      .reduce((prev, pack) => {
-        const fromVersion = dependencyMap[targetDependency].packs[pack];
+      .reduce((prev, depName) => {
+        const { version: fromVersion } = dependencyMap[targetDependency].packs[
+          depName
+        ];
 
         if (fromVersion === targetVersion) return prev;
 
         return fromVersion
-          ? [...prev, `* ${pack}: ${fromVersion} →  ${targetVersion}`]
-          : [...prev, `* ${pack}: ${targetVersion}`];
+          ? [...prev, `* ${depName}: ${fromVersion} →  ${targetVersion}`]
+          : [...prev, `* ${depName}: ${targetVersion}`];
       }, [])
       .join("\n");
 
