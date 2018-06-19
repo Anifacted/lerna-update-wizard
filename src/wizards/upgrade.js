@@ -81,38 +81,38 @@ module.exports = async ({
     }
   ]);
 
-  const npmVersions = await runCommand(
-    `npm info ${targetDependency} versions --json`,
+  const npmPackageInfoRaw = await runCommand(
+    `npm info ${targetDependency} versions dist-tags --json`,
     {
       startMessage: `Fetching package information for "${targetDependency}"`,
       logOutput: false
     }
   );
 
-  const npmVersionsParsed = JSON.parse(npmVersions)
-    .map(version => ({ name: version }))
-    .reverse();
+  const npmPackageInfo = JSON.parse(npmPackageInfoRaw);
+  const npmVersions = npmPackageInfo.versions.reverse();
+  const npmDistTags = npmPackageInfo["dist-tags"];
 
   const highestInstalled = dependencyMap[targetDependency].versions
     .sort(semverCompare)
     .pop();
 
-  const { name: highestPublished } = npmVersionsParsed.shift();
-
   const availableVersions = [
+    ...Object.entries(npmDistTags).map(([tag, version]) => ({
+      name: `${version} ${chalk.bold(`#${tag}`)}`,
+      value: version
+    })),
     {
-      name: `${chalk.white("Highest published version")} ${chalk.grey(
-        `(${highestPublished})`
-      )}`,
-      value: highestPublished
-    },
-    {
-      name: `${chalk.white("Highest installed version")} ${chalk.grey(
-        `(${highestInstalled})`
-      )}`,
+      name: `${highestInstalled} ${chalk.bold("Highest installed")}`,
       value: highestInstalled
     },
-    ...npmVersionsParsed
+    ...npmVersions
+      .filter(
+        version =>
+          version !== highestInstalled &&
+          !Object.values(npmDistTags).includes(version)
+      )
+      .map(version => ({ name: version }))
   ];
 
   const { targetVersion } = await inquirer.prompt([
