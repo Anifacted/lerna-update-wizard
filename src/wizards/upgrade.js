@@ -7,6 +7,7 @@ const runCommand = require("../utils/runCommand");
 const semverCompare = require("semver-compare");
 
 const plural = (a, b, count) => `${count} ${count > 1 ? b : a}`;
+const sanitizeGitBranchName = name => name.replace(/@/g, "");
 
 module.exports = async ({
   dependencyMap,
@@ -191,7 +192,9 @@ module.exports = async ({
       name: "gitBranchName",
       message: "Enter a name for your branch:",
       when: ({ shouldCreateGitBranch }) => shouldCreateGitBranch,
-      default: `${userName}/${targetDependency}-${targetVersion}`
+      default: sanitizeGitBranchName(
+        `${userName}/${targetDependency}-${targetVersion}`
+      )
     },
     {
       type: "confirm",
