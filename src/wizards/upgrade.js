@@ -5,6 +5,7 @@ const fileExists = require("../utils/fileExists");
 const ui = require("../utils/ui");
 const runCommand = require("../utils/runCommand");
 const semverCompare = require("semver-compare");
+const perf = require("execution-time")();
 
 const plural = (a, b, count) => `${count} ${count > 1 ? b : a}`;
 const sanitizeGitBranchName = name => name.replace(/@/g, "");
@@ -126,6 +127,9 @@ module.exports = async ({
     },
   ]);
 
+  perf.start();
+  let totalInstalls = 0;
+
   for (let depName of targetPackages) {
     const { version, source } =
       dependencyMap[targetDependency].packs[depName] || {};
@@ -148,7 +152,6 @@ module.exports = async ({
 
     const sourceParam = {
       yarn: {
-        dependencies: "",
         devDependencies: "--dev",
       },
       npm: {
@@ -157,16 +160,25 @@ module.exports = async ({
       },
     }[dependencyManager][source || "dependencies"];
 
-    const installCmd =
-      dependencyManager === "yarn"
-        ? `yarn add ${sourceParam} ${targetDependency}@${targetVersion}`
-        : `npm install ${sourceParam} ${targetDependency}@${targetVersion}`;
+    const installCmd = (dependencyManager === "yarn"
+      ? ["yarn", "add", sourceParam, `${targetDependency}@${targetVersion}`]
+      : ["npm", "install", sourceParam, `${targetDependency}@${targetVersion}`]
+    ).join(" ");
 
     await runCommand(`cd ${packDir} && ${installCmd}`, {
       startMessage: `${chalk.white.bold(depName)}: ${installCmd}`,
       endMessage: chalk.green(`${depName} ✓`),
+      logTime: true,
     });
+
+    totalInstalls++;
   }
+
+  if (totalInstalls === 0) process.exit();
+
+  ui.log.write(
+    chalk.bold(`Installed ${totalInstalls} packages in ${perf.stop().words}`)
+  );
 
   const userName = (
     (await runCommand("git config --get github.user", { logOutput: false })) ||
