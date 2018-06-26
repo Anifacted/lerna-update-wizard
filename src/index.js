@@ -19,14 +19,14 @@ module.exports = async ({ input, flags }) => {
   const projectPackagePath = resolve(projectDir, "package.json");
   const packagesDir = resolve(projectDir, "packages");
 
-  if (!(await fileExists(projectPackagePath))) {
+  if (!await fileExists(projectPackagePath)) {
     ui.log.write(
       chalk.red.bold("No 'package.json' found in specified directory")
     );
     process.exit();
   }
 
-  if (!(await fileExists(packagesDir))) {
+  if (!await fileExists(packagesDir)) {
     ui.log.write(
       chalk.red.bold("No 'packages/' directory found. Is this a lerna project?")
     );
@@ -42,8 +42,8 @@ module.exports = async ({ input, flags }) => {
         ...prev,
         [name]: {
           version: deps[name],
-          source
-        }
+          source,
+        },
       }),
       {}
     );
@@ -59,8 +59,8 @@ module.exports = async ({ input, flags }) => {
       ...prev,
       [pack]: {
         ...setSourceForDeps(dependencies),
-        ...setSourceForDeps(devDependencies, "devDependencies")
-      }
+        ...setSourceForDeps(devDependencies, "devDependencies"),
+      },
     };
   }, {});
 
@@ -86,10 +86,10 @@ module.exports = async ({ input, flags }) => {
             name: dep,
             packs: { ...prevDep.packs, [pack]: { version, source } },
             versions,
-            color
-          }
+            color,
+          },
         };
-      }, prev)
+      }, prev),
     };
   }, {});
 
@@ -110,6 +110,6 @@ module.exports = async ({ input, flags }) => {
     packagesDir,
     packages,
     resolve,
-    flags
+    flags,
   });
 };

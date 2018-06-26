@@ -16,7 +16,7 @@ module.exports = async ({
   packagesDir,
   packages,
   resolve,
-  flags
+  flags,
 }) => {
   const allDependencies = Object.keys(dependencyMap);
 
@@ -38,7 +38,7 @@ module.exports = async ({
               "versions",
               dependencyMap[value].versions.length
             )})`
-          )}`
+          )}`,
         });
 
         const sorter = flags.dedupe
@@ -55,8 +55,8 @@ module.exports = async ({
                 .map(itemize)
             : allDependencies.sort(sorter).map(itemize)
         );
-      }
-    }
+      },
+    },
   ]);
 
   const { targetPackages } = await inquirer.prompt([
@@ -76,17 +76,17 @@ module.exports = async ({
         return {
           name: `${depName}${versionBit}${sourceBit}`,
           value: depName,
-          checked: !!version
+          checked: !!version,
         };
-      })
-    }
+      }),
+    },
   ]);
 
   const npmPackageInfoRaw = await runCommand(
     `npm info ${targetDependency} versions dist-tags --json`,
     {
       startMessage: `Fetching package information for "${targetDependency}"`,
-      logOutput: false
+      logOutput: false,
     }
   );
 
@@ -101,11 +101,11 @@ module.exports = async ({
   const availableVersions = [
     ...Object.entries(npmDistTags).map(([tag, version]) => ({
       name: `${version} ${chalk.bold(`#${tag}`)}`,
-      value: version
+      value: version,
     })),
     {
       name: `${highestInstalled} ${chalk.bold("Highest installed")}`,
-      value: highestInstalled
+      value: highestInstalled,
     },
     ...npmVersions
       .filter(
@@ -113,7 +113,7 @@ module.exports = async ({
           version !== highestInstalled &&
           !Object.values(npmDistTags).includes(version)
       )
-      .map(version => ({ name: version }))
+      .map(version => ({ name: version })),
   ];
 
   const { targetVersion } = await inquirer.prompt([
@@ -122,8 +122,8 @@ module.exports = async ({
       name: "targetVersion",
       message: "Select version to install:",
       pageSize: 10,
-      choices: availableVersions
-    }
+      choices: availableVersions,
+    },
   ]);
 
   for (let depName of targetPackages) {
@@ -149,12 +149,12 @@ module.exports = async ({
     const sourceParam = {
       yarn: {
         dependencies: "",
-        devDependencies: "--dev"
+        devDependencies: "--dev",
       },
       npm: {
         dependencies: "--save",
-        devDependencies: "--save-dev"
-      }
+        devDependencies: "--save-dev",
+      },
     }[dependencyManager][source || "dependencies"];
 
     const installCmd =
@@ -164,7 +164,7 @@ module.exports = async ({
 
     await runCommand(`cd ${packDir} && ${installCmd}`, {
       startMessage: `${chalk.white.bold(depName)}: ${installCmd}`,
-      endMessage: chalk.green(`${depName} ✓`)
+      endMessage: chalk.green(`${depName} ✓`),
     });
   }
 
@@ -180,12 +180,12 @@ module.exports = async ({
     shouldCreateGitBranch,
     shouldCreateGitCommit,
     gitBranchName,
-    gitCommitMessage
+    gitCommitMessage,
   } = await inquirer.prompt([
     {
       type: "confirm",
       name: "shouldCreateGitBranch",
-      message: "Do you want to create a new git branch for the change?"
+      message: "Do you want to create a new git branch for the change?",
     },
     {
       type: "input",
@@ -194,27 +194,27 @@ module.exports = async ({
       when: ({ shouldCreateGitBranch }) => shouldCreateGitBranch,
       default: sanitizeGitBranchName(
         `${userName}/${targetDependency}-${targetVersion}`
-      )
+      ),
     },
     {
       type: "confirm",
       name: "shouldCreateGitCommit",
-      message: "Do you want to create a new git commit for the change?"
+      message: "Do you want to create a new git commit for the change?",
     },
     {
       type: "input",
       name: "gitCommitMessage",
       message: "Enter a git commit message:",
       when: ({ shouldCreateGitCommit }) => shouldCreateGitCommit,
-      default: `Upgrade dependency: ${targetDependency}@${targetVersion}`
-    }
+      default: `Upgrade dependency: ${targetDependency}@${targetVersion}`,
+    },
   ]);
 
   if (shouldCreateGitBranch) {
     const createCmd = `git checkout -b ${gitBranchName}`;
     await runCommand(`cd ${projectDir} && ${createCmd}`, {
       startMessage: `${chalk.white.bold(projectName)}: ${createCmd}`,
-      endMessage: chalk.green(`Branch created ✓`)
+      endMessage: chalk.green(`Branch created ✓`),
     });
   }
 
@@ -237,7 +237,7 @@ module.exports = async ({
     await runCommand(`cd ${projectDir} && ${createCmd}`, {
       startMessage: `${chalk.white.bold(projectName)}: git add . && git commit`,
       endMessage: chalk.green(`Commit created ✓`),
-      logOutput: false
+      logOutput: false,
     });
   }
 };
