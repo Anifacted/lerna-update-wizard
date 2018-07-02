@@ -2,8 +2,11 @@ const inquirer = require("inquirer");
 const chalk = require("chalk");
 
 const fileExists = require("../utils/fileExists");
-const ui = require("../utils/ui");
-const runCommand = require("../utils/runCommand");
+// const ui = require("../utils/ui");
+const ui = new inquirer.ui.BottomBar();
+
+const runCommand = require("../utils/runCommand")(ui);
+console.log(runCommand);
 const semverCompare = require("semver-compare");
 const perf = require("execution-time")();
 
@@ -21,8 +24,8 @@ module.exports = async ({
 }) => {
   const allDependencies = Object.keys(dependencyMap);
 
-  ui.log.write(`Starting update wizard for ${chalk.white.bold(projectName)}`);
-  ui.log.write("");
+  console.info(`Starting update wizard for ${chalk.white.bold(projectName)}`);
+  console.info("");
 
   const { targetDependency } = await inquirer.prompt([
     {
@@ -135,10 +138,10 @@ module.exports = async ({
       dependencyMap[targetDependency].packs[depName] || {};
 
     if (version === targetVersion) {
-      ui.log.write("");
-      ui.log.write(`Already installed (${targetVersion})`);
-      ui.log.write(chalk.green(`${depName} ✓`));
-      ui.log.write("");
+      console.info("");
+      console.info(`Already installed (${targetVersion})`);
+      console.info(chalk.green(`${depName} ✓`));
+      console.info("");
       continue;
     }
 
@@ -176,7 +179,7 @@ module.exports = async ({
 
   if (totalInstalls === 0) process.exit();
 
-  ui.log.write(
+  console.info(
     chalk.bold(`Installed ${totalInstalls} packages in ${perf.stop().words}`)
   );
 

@@ -1,10 +1,9 @@
 const { spawn } = require("child_process");
 const perf = require("execution-time")();
+const { logBottom } = require("../utils/ui");
 
-const ui = require("./ui");
-
-module.exports = async (cmd, options = {}) => {
-  ui.logBottom(options.startMessage);
+module.exports = ui => async (cmd, options = {}) => {
+  logBottom(ui, options.startMessage);
   const proc = spawn(cmd, { shell: true });
 
   if (options.logOutput !== false) proc.stdout.pipe(ui.log);
@@ -12,19 +11,21 @@ module.exports = async (cmd, options = {}) => {
 
   let data = "";
   return new Promise((resolve, reject) => {
-    proc.stdout.on("data", d => (data = data + d.toString()));
+    proc.stdout.on("data", d => {
+      data = data + d.toString();
+    });
     proc.stdout.on("end", () => {
-      ui.logBottom("");
+      logBottom("");
 
       if (options.endMessage || options.logTime) {
         const timeLog = options.logTime ? `(${perf.stop().words})` : "";
 
         const endMessage = options.endMessage || "";
 
-        ui.log.write([endMessage, timeLog].join(" "));
+        console.info([endMessage, timeLog].join(" "));
       }
 
-      ui.log.write("");
+      console.info("");
       resolve(data);
     });
     proc.stdout.on("error", reject);

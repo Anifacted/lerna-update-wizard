@@ -5,7 +5,6 @@ const chalk = require("chalk");
 const uniq = require("lodash/uniq");
 
 const fileExists = require("./utils/fileExists");
-const ui = require("./utils/ui");
 
 inquirer.registerPrompt(
   "autocomplete",
@@ -20,14 +19,14 @@ module.exports = async ({ input, flags }) => {
   const packagesDir = resolve(projectDir, "packages");
 
   if (!await fileExists(projectPackagePath)) {
-    ui.log.write(
+    console.info(
       chalk.red.bold("No 'package.json' found in specified directory")
     );
     process.exit();
   }
 
   if (!await fileExists(packagesDir)) {
-    ui.log.write(
+    console.info(
       chalk.red.bold("No 'packages/' directory found. Is this a lerna project?")
     );
     process.exit();

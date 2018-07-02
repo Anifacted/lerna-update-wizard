@@ -3,6 +3,9 @@
   "bin": {
     "lernaupdate": "./bin/lernaupdate"
   },
+  "scripts": {
+    "test": "jest --detectOpenHandles"
+  },
   "version": "0.7.1",
   "main": "index.js",
   "license": "MIT",
@@ -21,8 +24,11 @@
     "semver-compare": "^1.0.0"
   },
   "devDependencies": {
+    "@rauschma/stringio": "^1.4.0",
     "eslint": "^4.14.0",
     "eslint-config-pretty-standard": "^1.1.0",
-    "prettier": "^1.9.2"
+    "jest": "^23.2.0",
+    "prettier": "^1.9.2",
+    "unexpected": "^10.38.0"
   }
 }
