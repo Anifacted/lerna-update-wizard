@@ -34,7 +34,25 @@ module.exports = async ({ input, flags }) => {
   }
 
   const { name: projectName } = require(projectPackagePath);
-  const packages = fs.readdirSync(packagesDir);
+
+  ui.log.write("");
+  // Filter out invalid packages
+  const packages = fs.readdirSync(packagesDir).filter(name => {
+    const packageJsonPath = resolve(packagesDir, name, "package.json");
+    try {
+      fs.readFileSync(packageJsonPath);
+      return true;
+    } catch (e) {
+      ui.log.write(
+        `${chalk.yellow.bold(
+          `Note: Skipping entry with no package.json:`
+        )} "${packageJsonPath}"`
+      );
+      return false;
+    }
+  });
+
+  ui.log.write("");
 
   const setSourceForDeps = (deps = [], source = "dependencies") =>
     Object.keys(deps).reduce(
