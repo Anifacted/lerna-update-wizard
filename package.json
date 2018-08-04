@@ -32,7 +32,7 @@
     "unexpected-sinon": "^10.10.1"
   },
   "scripts": {
-    "test": "jest"
+    "test": "jest --verbose --runInBand"
   },
   "jest": {
     "testURL": "http://localhost"
