@@ -1,37 +1,64 @@
 const ensureArray = val => (Array.isArray(val) ? val : [val]);
 
-const trimInput = l => l.split("> ").pop();
+const Instruction = (type, value) => ({ type, value });
 
-module.exports = commandsStr =>
-  commandsStr
+const instructionFromLine = line => {
+  if (!line.startsWith(">>> ")) {
+    return Instruction("find", line);
+  }
+
+  // eslint-disable-next-line no-unused-vars
+  const [_, type, value] = line.split(" ");
+
+  if (!["find", "wait", "input"].includes(type)) {
+    return Instruction("find", line);
+  }
+
+  return Instruction(type, value);
+};
+
+const arrayReplaceLast = (array, replacement) => [
+  ...array.slice(0, array.length - 1),
+  replacement,
+];
+
+module.exports = instructionsString =>
+  instructionsString
     .split("\n")
-    .map(l => l.trim())
-    .filter(l => l.trim() !== "")
-    .reduce((prev, l, idx) => {
-      const isInput = l.startsWith("> ");
+    .map(line => line.trim())
+    .filter(line => line.trim() !== "")
+    .reduce((prev, line, idx) => {
+      const instruction = instructionFromLine(line);
 
-      if (prev.length === 0) {
-        return [isInput ? { input: trimInput(l) } : { lookFor: l }];
+      if (prev.length === 0) return [instruction];
+
+      const prevIndex = prev.length - 1;
+      const prevInstruction = prev[prevIndex];
+
+      switch (instruction.type) {
+        case "find":
+          if (prevInstruction.type === "find") {
+            return arrayReplaceLast(
+              prev,
+              Instruction("find", [
+                ...ensureArray(prevInstruction.value),
+                instruction.value,
+              ])
+            );
+          }
+          break;
+        case "input":
+          if (prevInstruction.type === "input") {
+            return arrayReplaceLast(
+              prev,
+              Instruction("input", [
+                ...ensureArray(prevInstruction.value),
+                instruction.value,
+              ])
+            );
+          }
+          break;
       }
 
-      if (!isInput && prev[prev.length - 1].lookFor) {
-        return [
-          ...prev.slice(0, prev.length - 1),
-          { lookFor: [...ensureArray(prev[prev.length - 1].lookFor), l] },
-        ];
-      }
-
-      if (isInput && prev[prev.length - 1].input) {
-        return [
-          ...prev.slice(0, prev.length - 1),
-          {
-            input: [...ensureArray(prev[prev.length - 1].input), trimInput(l)],
-          },
-        ];
-      }
-
-      // Default: new entry
-      return isInput
-        ? [...prev, { input: trimInput(l) }]
-        : [...prev, { lookFor: l }];
+      return [...prev, instruction];
     }, []);
