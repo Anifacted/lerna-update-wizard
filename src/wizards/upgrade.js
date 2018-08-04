@@ -48,17 +48,48 @@ module.exports = async ({
               dependencyMap[a].versions.length
           : undefined;
 
-        return Promise.resolve(
-          input
-            ? allDependencies
-                .filter(name => new RegExp(input).test(name))
-                .sort(sorter)
-                .map(itemize)
-            : allDependencies.sort(sorter).map(itemize)
-        );
+        let results = input
+          ? allDependencies
+              .filter(name => new RegExp(input).test(name))
+              .sort(sorter)
+              .map(itemize)
+          : allDependencies.sort(sorter).map(itemize);
+
+        if (input && !allDependencies.includes(input)) {
+          results = [
+            ...results,
+            {
+              name: `${input} ${chalk.green.bold("+ ADD NEW")}`,
+              value: input,
+            },
+          ];
+        }
+
+        return Promise.resolve(results);
       },
     },
   ]);
+
+  const isNewDependency = !allDependencies.includes(targetDependency);
+
+  const npmPackageInfoRaw = await runCommand(
+    `npm info ${targetDependency} versions dist-tags --json`,
+    {
+      startMessage: `Fetching package information for "${targetDependency}"`,
+      logOutput: false,
+    }
+  );
+
+  const npmPackageInfo = JSON.parse(npmPackageInfoRaw);
+
+  if (npmPackageInfo.error) {
+    ui.log.write(
+      chalk.red.bold(
+        `There was an error looking up "${targetDependency}" in NPM registry`
+      )
+    );
+    process.exit();
+  }
 
   const { targetPackages } = await inquirer.prompt([
     {
@@ -67,6 +98,14 @@ module.exports = async ({
       message: "Select packages to affect:",
       pageSize: 15,
       choices: packages.map(depName => {
+        if (isNewDependency) {
+          return {
+            name: depName,
+            value: depName,
+            checked: false,
+          };
+        }
+
         const { version, source } =
           dependencyMap[targetDependency].packs[depName] || {};
 
@@ -83,39 +122,28 @@ module.exports = async ({
     },
   ]);
 
-  const npmPackageInfoRaw = await runCommand(
-    `npm info ${targetDependency} versions dist-tags --json`,
-    {
-      startMessage: `Fetching package information for "${targetDependency}"`,
-      logOutput: false,
-    }
-  );
-
-  const npmPackageInfo = JSON.parse(npmPackageInfoRaw);
   const npmVersions = npmPackageInfo.versions.reverse();
   const npmDistTags = npmPackageInfo["dist-tags"];
 
-  const highestInstalled = dependencyMap[targetDependency].versions
-    .sort(semverCompare)
-    .pop();
+  const highestInstalled =
+    !isNewDependency &&
+    dependencyMap[targetDependency].versions.sort(semverCompare).pop();
 
   const availableVersions = [
     ...Object.entries(npmDistTags).map(([tag, version]) => ({
       name: `${version} ${chalk.bold(`#${tag}`)}`,
       value: version,
     })),
-    {
+    !isNewDependency && {
       name: `${highestInstalled} ${chalk.bold("Highest installed")}`,
       value: highestInstalled,
     },
-    ...npmVersions
-      .filter(
-        version =>
-          version !== highestInstalled &&
-          !Object.values(npmDistTags).includes(version)
-      )
-      .map(version => ({ name: version })),
-  ];
+    ...npmVersions.filter(
+      version =>
+        version !== highestInstalled &&
+        !Object.values(npmDistTags).includes(version)
+    ),
+  ].filter(Boolean);
 
   const { targetVersion } = await inquirer.prompt([
     {
@@ -130,19 +158,11 @@ module.exports = async ({
   perf.start();
   let totalInstalls = 0;
 
+  // Install process
   for (let depName of targetPackages) {
-    const { version, source } =
-      dependencyMap[targetDependency].packs[depName] || {};
+    const existingDependency = dependencyMap[targetDependency];
 
-    if (version === targetVersion) {
-      ui.log.write("");
-      ui.log.write(`Already installed (${targetVersion})`);
-      ui.log.write(chalk.green(`${depName} ✓`));
-      ui.log.write("");
-      continue;
-    }
-
-    const packDir = resolve(packagesDir, depName);
+    let source = "dependencies";
 
     const dependencyManager = (await fileExists(
       resolve(projectDir, "yarn.lock")
@@ -150,9 +170,43 @@ module.exports = async ({
       ? "yarn"
       : "npm";
 
+    if (existingDependency && existingDependency.packs[depName]) {
+      const { version, source: theSource } =
+        existingDependency.packs[depName] || {};
+
+      source = theSource;
+
+      if (version === targetVersion) {
+        ui.log.write("");
+        ui.log.write(`Already installed (${targetVersion})`);
+        ui.log.write(chalk.green(`${depName} ✓`));
+        ui.log.write("");
+        continue;
+      }
+    } else {
+      const { targetSource } = await inquirer.prompt([
+        {
+          type: "list",
+          name: "targetSource",
+          message: `Select dependency installation type for "${depName}"`,
+          pageSize: 3,
+          choices: [
+            { name: "dependencies" },
+            { name: "devDependencies" },
+            dependencyManager === "yarn" && { name: "peerDependencies" },
+          ].filter(Boolean),
+        },
+      ]);
+
+      source = targetSource;
+    }
+
+    const packDir = resolve(packagesDir, depName);
+
     const sourceParam = {
       yarn: {
         devDependencies: "--dev",
+        peerDependencies: "--peer",
       },
       npm: {
         dependencies: "--save",
@@ -182,7 +236,7 @@ module.exports = async ({
 
   const userName = (
     (await runCommand("git config --get github.user", { logOutput: false })) ||
-    (await runCommand("whoami")) ||
+    (await runCommand("whoami", { logOutput: false })) ||
     "upgrade"
   )
     .split("\n")

@@ -69,8 +69,6 @@ const run = (proc, { type, value, maxWait = 5 }, onStdOut) =>
           proc.stdout.on("data", resolveIfFound);
         }
 
-        latestBuffer = "";
-
         break;
       case "input":
         const sendInput = async data => {
@@ -81,6 +79,8 @@ const run = (proc, { type, value, maxWait = 5 }, onStdOut) =>
 
         const sendInputs = async inputs => {
           for (const input of inputs) {
+            latestBuffer = "";
+
             await sendInput(input);
           }
         };
