@@ -1,4 +1,4 @@
-const runProgram = require("./utils/runProgram");
+const { default: runProgram } = require("./utils/runProgram");
 const generateProject = require("./utils/generateProject");
 
 describe("Simple install", async () => {
@@ -26,61 +26,52 @@ describe("Simple install", async () => {
     await runProgram(
       projectPath,
       ` ? Select a dependency to upgrade: (Use arrow keys or type to search)
-        > lodash
+
+        >>> input lodash
 
         ❯ lodash (2 versions)
-        > ENTER
 
-        ❯◯ sub-package-a
-         ◉ sub-package-b (0.1.0)
-         ◯ sub-package-c
-         ◉ sub-package-d (0.2.0)
+        >>> input ENTER
 
-        > ARROW_UP
-
-         ◯ sub-package-a
-         ◉ sub-package-b (0.1.0)
-         ◯ sub-package-c
-        ❯◉ sub-package-d (0.2.0)
-
-        > ARROW_UP
-
-         ◯ sub-package-a
-         ◉ sub-package-b (0.1.0)
-        ❯◯ sub-package-c
-         ◉ sub-package-d (0.2.0)
-
-        > SPACE
-
-        ◯ sub-package-a
+        ? Select a dependency to upgrade: lodash (2 versions)
+       ❯◯ sub-package-a
         ◉ sub-package-b (0.1.0)
-       ❯◉ sub-package-c
+        ◯ sub-package-c
         ◉ sub-package-d (0.2.0)
 
-        > ENTER
+       >>> input ARROW_UP
+       >>> input ARROW_UP
+       >>> input SPACE
 
-        ? Select version to install: (Use arrow keys)
+       ◯ sub-package-a
+       ◉ sub-package-b (0.1.0)
+      ❯◉ sub-package-c
+       ◉ sub-package-d (0.2.0)
 
-        > ARROW_UP
-        > ARROW_UP
-        > ARROW_UP
+       >>> input ENTER
 
-        ❯ 0.2.2
-          0.2.1
-          0.1.0
+       ? Select version to install: (Use arrow keys)
 
-        > ENTER
+       >>> input ARROW_UP
+       >>> input ARROW_UP
+       >>> input ARROW_UP
 
-        ? Do you want to create a new git branch for the change? (Y/n)
-        > n
-        > ENTER
+       ❯ 0.2.2
+         0.2.1
+         0.1.0
 
-        ? Do you want to create a new git commit for the change? (Y/n)
-        > n
-        > ENTER
+       >>> input ENTER
 
-        ? Do you want to create a new git commit for the change? No
-        `
+       ? Do you want to create a new git branch for the change? (Y/n)
+
+       >>> input n
+       >>> input ENTER
+
+       ? Do you want to create a new git commit for the change? (Y/n)
+
+       >>> input n
+       >>> input ENTER
+       `
     );
   });
 });
