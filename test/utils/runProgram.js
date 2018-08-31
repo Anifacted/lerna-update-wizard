@@ -19,7 +19,7 @@ let latestBuffer = "";
 
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 
-const run = (proc, { type, value, maxWait = 5 }, onStdOut) =>
+const run = (proc, { type, value, maxWait = 10 }, onStdOut) =>
   new Promise(async (resolve, reject) => {
     if (!proc) return resolve();
 
