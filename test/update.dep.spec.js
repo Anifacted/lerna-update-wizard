@@ -72,8 +72,7 @@ describe("Update dependency", async () => {
 
         >>> input n
         >>> input ENTER
-        `,
-        { log: true }
+        `
       );
     });
   });

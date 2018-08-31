@@ -98,7 +98,11 @@ const run = (proc, { type, value, maxWait = 5 }, onStdOut) =>
 
 module.exports.run = run;
 
-module.exports.default = (projectPath, inputSequence, { log = false } = {}) => {
+module.exports.default = (
+  projectPath,
+  inputSequence,
+  { log = !!process.env.CI } = {}
+) => {
   const program =
     typeof inputSequence === "string"
       ? sequenceFromString(inputSequence)
