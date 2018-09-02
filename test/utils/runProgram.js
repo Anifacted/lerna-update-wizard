@@ -13,6 +13,7 @@ const keys = {
   ENTER: "\n",
   "CTRL+C": "\u0003",
   SPACE: " ",
+  BACKSPACE: "\u0008",
 };
 
 let latestBuffer = "";
@@ -91,7 +92,7 @@ const run = (proc, { type, value, maxWait = 10 }, onStdOut) =>
     }
 
     proc.stdout.on("end", async () => {
-      await delay(1000);
+      await delay(maxWait * 1000);
       resolve();
     });
   });

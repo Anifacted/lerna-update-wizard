@@ -1,11 +1,14 @@
 const { default: runProgram } = require("./utils/runProgram");
 const generateProject = require("./utils/generateProject");
+const fileExists = require("../src/utils/fileExists");
+const { resolve } = require("path");
+const expect = require("unexpected");
 
 describe("Adding new dependency", async () => {
-  let projectPath;
-
-  beforeEach(async () => {
-    projectPath = await generateProject({
+  it("correctly installs a new version", async () => {
+    // eslint-disable-next-line
+    jest.setTimeout(100000);
+    const projectPath = await generateProject({
       name: "project-a",
       packages: [
         { name: "sub-package-a" },
@@ -17,18 +20,11 @@ describe("Adding new dependency", async () => {
         { name: "sub-package-d", dependencies: { lodash: "0.2.0" } },
       ],
     });
-  });
-
-  it("correctly installs a new version", async () => {
-    // eslint-disable-next-line
-    jest.setTimeout(100000);
 
     await runProgram(
       projectPath,
       `
-      Starting update wizard for project-a
-
-      ? Select a dependency to upgrade: (Use arrow keys or type to search)
+        ? Select a dependency to upgrade: (Use arrow keys or type to search)
 
         >>> input tree
 
@@ -36,9 +32,14 @@ describe("Adding new dependency", async () => {
         ❯ treediff (1 version)
           tree + ADD NEW
 
-        >>> input ARROW_DOWN
+        >>> input BACKSPACE
+        >>> input BACKSPACE
+        >>> input BACKSPACE
+        >>> input BACKSPACE
 
-        ❯ tree + ADD NEW
+        >>> input promise-react-component
+
+        ❯ promise-react-component + ADD NEW
 
         >>> input ENTER
 
@@ -61,8 +62,8 @@ describe("Adding new dependency", async () => {
         >>> input ARROW_UP
         >>> input ARROW_UP
 
-        ❯ 0.1.1
-          0.1.0
+        ❯ 0.0.2
+          0.0.1
 
         >>> input ENTER
 
@@ -70,8 +71,22 @@ describe("Adding new dependency", async () => {
         ❯ dependencies
           devDependencies
 
+        >>> input ENTER
+
+        ? Do you want to create a new git branch for the change? (Y/n)
+
         >>> input CTRL+C
        `
+    );
+
+    expect(
+      await fileExists(
+        resolve(
+          projectPath,
+          "packages/sub-package-c/node_modules/promise-react-component/package.json"
+        )
+      ),
+      "to be true"
     );
   });
 });
