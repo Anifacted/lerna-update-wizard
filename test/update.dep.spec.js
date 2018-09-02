@@ -2,33 +2,27 @@ const { default: runProgram } = require("./utils/runProgram");
 const generateProject = require("./utils/generateProject");
 
 describe("Update dependency", async () => {
-  let projectPath;
-
-  beforeEach(async () => {
-    projectPath = await generateProject({
-      name: "project-a",
-      packages: [
-        { name: "sub-package-a" },
-        {
-          name: "sub-package-b",
-          dependencies: { lodash: "0.1.0" },
-        },
-        { name: "sub-package-c" },
-        { name: "sub-package-d", dependencies: { lodash: "0.2.0" } },
-      ],
-    });
-  });
-
   describe("dep already is installed in all selected packages", () => {
     it("updates", async () => {
       // eslint-disable-next-line
       jest.setTimeout(100000);
 
+      const projectPath = await generateProject({
+        name: "project-a",
+        packages: [
+          { name: "sub-package-a" },
+          {
+            name: "sub-package-b",
+            dependencies: { lodash: "0.1.0" },
+          },
+          { name: "sub-package-c" },
+          { name: "sub-package-d", dependencies: { lodash: "0.2.0" } },
+        ],
+      });
+
       await runProgram(
         projectPath,
         `
-        Starting update wizard for project-a
-
         ? Select a dependency to upgrade: (Use arrow keys or type to search)
 
         >>> input lodash
@@ -82,11 +76,22 @@ describe("Update dependency", async () => {
       // eslint-disable-next-line
       jest.setTimeout(100000);
 
+      const projectPath = await generateProject({
+        name: "project-b",
+        packages: [
+          { name: "sub-package-a" },
+          {
+            name: "sub-package-b",
+            dependencies: { lodash: "0.1.0" },
+          },
+          { name: "sub-package-c" },
+          { name: "sub-package-d", dependencies: { lodash: "0.2.0" } },
+        ],
+      });
+
       await runProgram(
         projectPath,
         `
-        Starting update wizard for project-a
-
         ? Select a dependency to upgrade: (Use arrow keys or type to search)
 
         >>> input lodash

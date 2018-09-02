@@ -14,7 +14,6 @@ module.exports = async ({
   dependencyMap,
   projectName,
   projectDir,
-  packagesDir,
   packages,
   resolve,
   flags,
@@ -97,25 +96,25 @@ module.exports = async ({
       name: "targetPackages",
       message: "Select packages to affect:",
       pageSize: 15,
-      choices: packages.map(depName => {
+      choices: packages.map(({ config: { name: packageName } }) => {
         if (isNewDependency) {
           return {
-            name: depName,
-            value: depName,
+            name: packageName,
+            value: packageName,
             checked: false,
           };
         }
 
         const { version, source } =
-          dependencyMap[targetDependency].packs[depName] || {};
+          dependencyMap[targetDependency].packs[packageName] || {};
 
         const versionBit = version ? ` (${version})` : "";
         const sourceBit =
           source === "devDependencies" ? chalk.white(" (dev)") : "";
 
         return {
-          name: `${depName}${versionBit}${sourceBit}`,
-          value: depName,
+          name: `${packageName}${versionBit}${sourceBit}`,
+          value: packageName,
           checked: !!version,
         };
       }),
@@ -201,7 +200,9 @@ module.exports = async ({
       source = targetSource;
     }
 
-    const packDir = resolve(packagesDir, depName);
+    const { path: packageDir } = packages.find(
+      ({ config: { name } }) => name === depName
+    );
 
     const sourceParam = {
       yarn: {
@@ -219,7 +220,7 @@ module.exports = async ({
       : ["npm", "install", sourceParam, `${targetDependency}@${targetVersion}`]
     ).join(" ");
 
-    await runCommand(`cd ${packDir} && ${installCmd}`, {
+    await runCommand(`cd ${packageDir} && ${installCmd}`, {
       startMessage: `${chalk.white.bold(depName)}: ${installCmd}`,
       endMessage: chalk.green(`${depName} ✓`),
       logTime: true,

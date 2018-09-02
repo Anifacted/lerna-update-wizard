@@ -1,10 +1,11 @@
 const fs = require("fs-extra");
 const path = require("path");
-const execSync = require("child_process").execSync;
+const util = require("util");
+const exec = util.promisify(require("child_process").exec);
 const chalk = require("chalk");
 
 const generateProject = async options => {
-  const { name, packages, dependencies, prefixPath } = options;
+  const { name, packages, dependencies, prefixPath, lernaJson } = options;
 
   const p = path.resolve(prefixPath, name);
 
@@ -30,19 +31,24 @@ const generateProject = async options => {
     )
   );
 
+  if (lernaJson) {
+    await fs.outputFile(
+      path.resolve(p, "lerna.json"),
+      JSON.stringify(lernaJson, null, 2)
+    );
+  }
+
   if (typeof dependencies === "object") {
-    execSync(`cd ${p} && npm install`);
+    await exec(`cd ${p} && npm install`);
   }
 
   if (packages) {
-    await Promise.all(
-      packages.map(pOptions => {
-        generateProject({
-          ...pOptions,
-          prefixPath: path.resolve(p, "packages"),
-        });
-      })
-    );
+    for (let pOptions of packages) {
+      await generateProject({
+        ...pOptions,
+        prefixPath: path.resolve(p, pOptions.moduleDirName || "packages"),
+      });
+    }
   }
 };
 
