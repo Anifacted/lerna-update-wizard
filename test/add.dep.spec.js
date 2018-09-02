@@ -32,9 +32,14 @@ describe("Adding new dependency", async () => {
         ❯ treediff (1 version)
           tree + ADD NEW
 
-        >>> input ARROW_DOWN
+        >>> input BACKSPACE
+        >>> input BACKSPACE
+        >>> input BACKSPACE
+        >>> input BACKSPACE
 
-        ❯ tree + ADD NEW
+        >>> input promise-react-component
+
+        ❯ promise-react-component + ADD NEW
 
         >>> input ENTER
 
@@ -57,8 +62,8 @@ describe("Adding new dependency", async () => {
         >>> input ARROW_UP
         >>> input ARROW_UP
 
-        ❯ 0.1.1
-          0.1.0
+        ❯ 0.0.2
+          0.0.1
 
         >>> input ENTER
 
@@ -78,7 +83,7 @@ describe("Adding new dependency", async () => {
       await fileExists(
         resolve(
           projectPath,
-          "packages/sub-package-c/node_modules/tree/package.json"
+          "packages/sub-package-c/node_modules/promise-react-component/package.json"
         )
       ),
       "to be true"

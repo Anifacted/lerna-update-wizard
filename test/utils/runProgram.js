@@ -13,6 +13,7 @@ const keys = {
   ENTER: "\n",
   "CTRL+C": "\u0003",
   SPACE: " ",
+  BACKSPACE: "\u0008",
 };
 
 let latestBuffer = "";
