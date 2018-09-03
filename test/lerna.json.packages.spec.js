@@ -14,7 +14,7 @@ const projectConfig = {
   ],
 };
 
-describe("Alternative packages directory", () => {
+describe("lerna.json `packages` configuration", () => {
   describe("when given no lerna.json", () => {
     it("cannot find any packages for the project", async () => {
       // eslint-disable-next-line
