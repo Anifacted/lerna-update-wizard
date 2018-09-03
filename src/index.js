@@ -33,6 +33,14 @@ module.exports = async ({ input, flags }) => {
     lernaConfig = require(resolve(projectDir, "lerna.json"));
   } catch (e) {}
 
+  ui.log.write(
+    `\n${chalk.bold("Lerna Update Wizard")}\n${chalk.grey(
+      "v" + require("../package.json").version
+    )}\n\n`
+  );
+
+  ui.logBottom("Collecting packages...");
+
   const packagesRead = await globby(
     (lernaConfig.packages || ["packages/*"]).map(glob =>
       resolve(projectDir, glob, "package.json")
@@ -49,6 +57,8 @@ module.exports = async ({ input, flags }) => {
     ui.log.write(chalk.red.bold("No packages found. Is this a Lerna project?"));
     process.exit();
   }
+
+  ui.logBottom("");
 
   const setSourceForDeps = (deps = [], source = "dependencies") =>
     Object.keys(deps).reduce(
