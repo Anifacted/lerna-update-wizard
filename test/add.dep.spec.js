@@ -32,7 +32,7 @@ describe("Adding new dependency", async () => {
 
         ? Select a dependency to upgrade: tree
         ❯ treediff (1 version)
-          tree + ADD NEW
+          tree [+ADD]
 
         >>> input BACKSPACE
         >>> input BACKSPACE
@@ -41,7 +41,7 @@ describe("Adding new dependency", async () => {
 
         >>> input promise-react-component
 
-        ❯ promise-react-component + ADD NEW
+        ❯ promise-react-component [+ADD]
 
         >>> input ENTER
 

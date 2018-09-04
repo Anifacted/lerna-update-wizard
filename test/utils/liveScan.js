@@ -22,14 +22,16 @@ const match = (
 
     if (scan === tar.length) {
       const matchContext = [
+        buf[base - 7] && buf[base - 7],
+        buf[base - 6] && buf[base - 6],
         buf[base - 5] && buf[base - 5],
         buf[base - 4] && buf[base - 4],
         buf[base - 3] && buf[base - 3],
         buf[base - 2] && buf[base - 2],
         buf[base - 1] && buf[base - 1],
       ]
-        .filter(Boolean)
-        .join("\n");
+        .join("\n")
+        .trim();
 
       const matchTarget = [...tar.map((_, idx) => buf[base + idx])]
         .filter(Boolean)

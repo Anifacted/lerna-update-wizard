@@ -173,7 +173,7 @@ module.exports = async ({ input, flags }) => {
           results = [
             ...results,
             {
-              name: `${input} ${chalk.green.bold("+ ADD NEW")}`,
+              name: `${input} ${chalk.green.bold("[+ADD]")}`,
               value: input,
             },
           ];

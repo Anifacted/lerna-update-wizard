@@ -33,7 +33,7 @@ describe("--dedupe flag", () => {
         >>> input tree
 
         ? Select a dependency to upgrade: tree
-        ❯ tree + ADD NEW
+        ❯ tree [+ADD]
 
         >>> input CTRL+C
         `
