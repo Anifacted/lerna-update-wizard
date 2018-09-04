@@ -22,7 +22,7 @@ const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 let scanner;
 
-const run = (proc, { type, value, maxWait = 5 }, onStdOut) =>
+const run = (proc, { type, value, maxWait = 8 }, onStdOut) =>
   new Promise(async (resolve, reject) => {
     if (!proc) return resolve();
 
