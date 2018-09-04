@@ -38,7 +38,7 @@ $ lernaupdate ~/projects/my-lerna-project
 
 When running the command you will be prompted to search for and select the dependency you wish to install:
 
-![Select dependency](https://raw.githubusercontent.com/Anifacted/lerna-update-wizard/master/public/update.png?raw=true "Select dependency")
+![Select dependency](https://raw.githubusercontent.com/Anifacted/lerna-update-wizard/master/public/update.gif?raw=true "Select dependency")
 
 ### Step 2
 
