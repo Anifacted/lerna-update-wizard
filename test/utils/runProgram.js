@@ -4,6 +4,8 @@ const fs = require("fs-extra");
 const sequenceFromString = require("./sequenceFromString");
 const { spawn } = require("child_process");
 
+const { scan: liveScan } = require("./liveScan");
+
 // From https://www.novell.com/documentation/extend5/Docs/help/Composer/books/TelnetAppendixB.html
 const keys = {
   ARROW_UP: "\u001b[A",
@@ -16,11 +18,11 @@ const keys = {
   BACKSPACE: "\u0008",
 };
 
-let latestBuffer = "";
-
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 
-const run = (proc, { type, value, maxWait = 10 }, onStdOut) =>
+let scanner;
+
+const run = (proc, { type, value, maxWait = 5 }, onStdOut) =>
   new Promise(async (resolve, reject) => {
     if (!proc) return resolve();
 
@@ -28,60 +30,55 @@ const run = (proc, { type, value, maxWait = 10 }, onStdOut) =>
 
     proc.stdout.on("data", bufferData => {
       const data = bufferData.toString();
-      latestBuffer += data;
       onStdOut && onStdOut(data);
+      scanner && scanner.feed(data);
     });
 
     switch (type) {
       case "wait":
         return resolve(proc);
       case "find":
-        let timeoutId = setTimeout(() => {
-          reject(new Error(`Did not find "${value}" within ${maxWait} sec.`));
-        }, maxWait * 1000);
+        const lastBuffer = scanner && scanner.getBuffer();
 
-        const resolveIfFound = bufferOrString => {
-          const data = bufferOrString.toString();
-          const isFound = Array.isArray(value)
-            ? value.every(line => data.includes(line))
-            : data.includes(value);
+        scanner = liveScan({
+          timeout: maxWait * 1000,
+          target: value,
+          onFind: ({ matchContext, matchTarget }) => {
+            console.info(
+              [
+                chalk.green.dim(matchContext),
+                chalk.green.bold(matchTarget),
+              ].join("\n")
+            );
 
-          if (isFound) {
-            clearTimeout(timeoutId);
+            resolve(proc);
+          },
+          onTimeout: ({ targetBlob, bufferBlob }) => {
+            console.info(
+              [
+                chalk.bold.red("Did not find:"),
+                chalk.yellow(targetBlob),
+                chalk.bold.red("\nInstead found:"),
+                chalk.yellow(bufferBlob),
+                chalk.bold.red(`\n\n(After waiting ${maxWait} seconds)`),
+              ].join("\n")
+            );
+            reject(new Error("Timeout error"));
+          },
+        });
 
-            const output = Array.isArray(value)
-              ? latestBuffer
-                  .toString()
-                  .split("\n")
-                  .filter(l => value.some(lf => l.includes(lf)))
-                  .join("\n")
-              : `"${value}"`;
-
-            console.info(chalk.green(`Found:\n${output}\n`));
-
-            delay(500).then(() => resolve(proc));
-          }
-          return isFound;
-        };
-
-        const foundInBuffer = resolveIfFound(latestBuffer);
-
-        if (!foundInBuffer) {
-          proc.stdout.on("data", resolveIfFound);
-        }
+        lastBuffer && scanner.feed(lastBuffer);
 
         break;
       case "input":
         const sendInput = async data => {
           console.info(chalk.blue(`Input: ${data}`));
           streamWrite(proc.stdin, keys[data] || data);
-          await delay(200); // Prevent clogging
+          await delay(250); // Simulate natural user input
         };
 
         const sendInputs = async inputs => {
           for (const input of inputs) {
-            latestBuffer = "";
-
             await sendInput(input);
           }
         };
@@ -102,7 +99,7 @@ module.exports.run = run;
 module.exports.default = (
   projectPath,
   inputSequence,
-  { log = !!process.env.CI } = {}
+  { log = !!process.env.CI || !!process.env.DEBUG } = {}
 ) => {
   const program =
     typeof inputSequence === "string"
@@ -116,13 +113,16 @@ module.exports.default = (
   const cmd = `./bin/lernaupdate ${projectPath}`;
   const proc = spawn(cmd, { shell: true });
 
-  console.info(chalk.white.bold(`Running program: ${cmd}`));
   const logFilePath = `./tmp/test-log.txt`;
 
   fs.ensureFileSync(logFilePath);
 
-  console.info("Track log output:");
-  console.info(chalk.bold.white(`tail -f ${logFilePath} | sed 's/\\n/\\n/g'`));
+  console.info(`${chalk.white.bold(
+    "Running command:"
+  )} ${cmd}\n${chalk.bold.white(
+    "Log output:"
+  )}      ${`tail -f ${logFilePath} | sed 's/\\n/\\n/g'`}
+  `);
 
   const onStdOut = content => {
     log && console.info(chalk.red(content));

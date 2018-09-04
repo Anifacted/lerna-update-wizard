@@ -25,6 +25,8 @@ describe("Adding new dependency", async () => {
       projectPath,
       `
         ? Select a dependency to upgrade: (Use arrow keys or type to search)
+        ❯ lodash (1 version)
+          treediff (1 version)
 
         >>> input tree
 

@@ -4,12 +4,12 @@ const util = require("util");
 const exec = util.promisify(require("child_process").exec);
 const chalk = require("chalk");
 
-const generateProject = async options => {
+const generateProject = async (options, log) => {
   const { name, packages, dependencies, prefixPath, lernaJson } = options;
 
   const p = path.resolve(prefixPath, name);
 
-  console.info(chalk.bold("Creating project", p));
+  console.info(log);
 
   await fs.outputFile(
     path.resolve(p, "package.json"),
@@ -44,10 +44,13 @@ const generateProject = async options => {
 
   if (packages) {
     for (let pOptions of packages) {
-      await generateProject({
-        ...pOptions,
-        prefixPath: path.resolve(p, pOptions.moduleDirName || "packages"),
-      });
+      await generateProject(
+        {
+          ...pOptions,
+          prefixPath: path.resolve(p, pOptions.moduleDirName || "packages"),
+        },
+        `└──${pOptions.name}`
+      );
     }
   }
 };
@@ -56,7 +59,10 @@ module.exports = async options => {
   await fs.remove(path.resolve("tmp"));
   const prefixPath = path.resolve("tmp");
 
-  await generateProject({ ...options, prefixPath });
+  await generateProject(
+    { ...options, prefixPath },
+    `${chalk.bold.white("Creating project:")} ${options.name}`
+  );
 
   return path.resolve(prefixPath, options.name);
 };
