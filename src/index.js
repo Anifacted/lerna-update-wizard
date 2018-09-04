@@ -3,14 +3,14 @@ const inquirer = require("inquirer");
 const chalk = require("chalk");
 const uniq = require("lodash/uniq");
 const globby = require("globby");
-const runCommand = require("./utils/runCommand");
 const semverCompare = require("semver-compare");
 const perf = require("execution-time")();
+
+const runCommand = require("./utils/runCommand");
 const fileExists = require("./utils/fileExists");
 const ui = require("./utils/ui");
-
-const plural = (a, b, count) => `${count} ${count === 1 ? a : b}`;
-const sanitizeGitBranchName = name => name.replace(/@/g, "");
+const plural = require("./utils/plural");
+const sanitizeGitBranchName = require("./utils/sanitizeGitBranchName");
 
 inquirer.registerPrompt(
   "autocomplete",
