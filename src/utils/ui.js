@@ -1,22 +1,25 @@
 const inquirer = require("inquirer");
 const ui = new inquirer.ui.BottomBar();
+const stripAnsi = require("strip-ansi");
+
+const { player } = require("./processIndicator");
 
 let bottomMessageUpdateId = null;
 let bottomMessage = "";
 
 module.exports.logBottom = (message = "") => {
-  const chars = "/-\\|";
-  let index = 0;
+  const { tick } = player({
+    frames: 6,
+    size: stripAnsi(message).length,
+  });
 
   if (message !== bottomMessage) {
     clearInterval(bottomMessageUpdateId);
 
     if (message !== "") {
       bottomMessageUpdateId = setInterval(() => {
-        if (chars.charAt(index) === "") index = 0;
-
-        ui.updateBottomBar(`${chars.charAt(index++)} ${message}`);
-      }, 100);
+        ui.updateBottomBar(`${message}\n${tick()}\n`);
+      }, 50);
     } else {
       ui.updateBottomBar("");
     }

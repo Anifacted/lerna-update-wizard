@@ -45,10 +45,10 @@ describe("Adding new dependency", async () => {
 
         >>> input ENTER
 
-        ❯◯ sub-package-a
-         ◯ sub-package-b
-         ◯ sub-package-c
-         ◯ sub-package-d
+       ❯◯ sub-package-a
+        ◯ sub-package-b
+        ◯ sub-package-c
+        ◯ sub-package-d
 
         >>> input ARROW_DOWN
         >>> input ARROW_DOWN

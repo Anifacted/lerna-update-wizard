@@ -33,7 +33,7 @@ describe("Update dependency", async () => {
 
         >>> input ENTER
 
-        / Fetching package information for "lodash"
+        Fetching package information for "lodash"
 
         >>> wait
 

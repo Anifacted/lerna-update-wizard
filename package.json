@@ -19,7 +19,8 @@
     "lodash": "^4.17.4",
     "meow": "^4.0.0",
     "minimist": "^1.2.0",
-    "semver-compare": "^1.0.0"
+    "semver-compare": "^1.0.0",
+    "strip-ansi": "^4.0.0"
   },
   "devDependencies": {
     "@rauschma/stringio": "^1.4.0",

@@ -23,7 +23,7 @@ module.exports = async ({ input, flags }) => {
 
   const projectPackageJsonPath = resolve(projectDir, "package.json");
 
-  if (!await fileExists(projectPackageJsonPath)) {
+  if (!(await fileExists(projectPackageJsonPath))) {
     ui.log.write(
       chalk.red.bold("No 'package.json' found in specified directory")
     );
@@ -38,13 +38,11 @@ module.exports = async ({ input, flags }) => {
     lernaConfig = require(resolve(projectDir, "lerna.json"));
   } catch (e) {}
 
-  ui.log.write(
-    `\n${chalk.bold("Lerna Update Wizard")}\n${chalk.grey(
+  ui.logBottom(
+    `\n${chalk.bold("Lerna Update Wizard")} ${chalk.grey(
       "v" + require("../package.json").version
-    )}\n\n`
+    )}`
   );
-
-  ui.logBottom("Collecting packages...");
 
   const packagesRead = await globby(
     (lernaConfig.packages || ["packages/*"]).map(glob =>
