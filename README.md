@@ -1,18 +1,20 @@
-# Lerna update wizard
+# Lerna Update Wizard
 
 Command line interface for simplifying the process of bulk updating dependencies across multiple Lerna packages.
 
 ## Install
 
 ```bash
-$ yarn add lerna-update-wizard
+$ yarn add --dev lerna-update-wizard
 ```
+
 Or via NPM:
+
 ```bash
 $ npm install --save-dev lerna-update-wizard
 ```
 
-If installed globally, it can be used independently of a project:
+If installed globally, it can be used independently on any project:
 
 ```bash
 $ yarn global add lerna-update-wizard
@@ -20,7 +22,7 @@ $ yarn global add lerna-update-wizard
 
 ## Usage
 
-Simply run the command in the root of a Lerna based project:
+Simply run the `lernaupdate` command in the root of a Lerna-based project:
 
 ```bash
 $ lernaupdate
@@ -32,26 +34,56 @@ Or from the outside by specifying the path to the project:
 $ lernaupdate ~/projects/my-lerna-project
 ```
 
-### Step 1
+## Features
 
-When running the command you will be prompted to search for and select the dependency you wish to install:
+### Update dependencies across packages
 
-![Select dependency](https://raw.githubusercontent.com/Anifacted/lerna-update-wizard/master/public/step1.png?raw=true "Select dependency")
+1. Search for and select the **dependency** to upgrade
+2. Select the **packages** in which you wish to perform the upgrade
+3. Pick the desired **version** to be installed for the dependency
 
-### Step 2
+![Update dependency](/public/update.gif?raw=true "Update dependency")
 
-After selecting a dependency you will be asked to specify which package(s) to install the dependency in. Packages with already installed versions of the dependency will be preselected with the installed version number shown:
+### Add new dependencies across packages
 
-![Select packages](https://raw.githubusercontent.com/Anifacted/lerna-update-wizard/master/public/step2.png?raw=true "Select packages")
+1. Enter the name of a **dependency** not already in your project
+2. Select the **packages** in which to add the dependency
+3. Pick the desired **version** to be installed for the dependency
+4. When prompted, specify dependency **type** for each package (normal/dev/peer)
 
-### Step 3
+![Add packages](/public/add.gif?raw=true "Add dependency")
 
-Next you will need to specify which version you wish to install from the list of available versions for that dependency:
+## Deduplicate dependencies across packages
 
-![Select version](https://raw.githubusercontent.com/Anifacted/lerna-update-wizard/master/public/step3.png?raw=true "Select version")
+1. Run the command with the `--dedupe` option
+2. Only dependencies installed with 2 or more differing versions will be presented
+3. Complete the flow like normal (described above)
 
-### Step 4
+![Deduplicate packages](/public/dedupe.gif?raw=true "Deduplicate dependency")
 
-Finally, you can optionally choose to create a git branch and/or commit containing the changes made in the update:
+## Auto-generate Git branch & commit
 
-![Git branc/commit](https://raw.githubusercontent.com/Anifacted/lerna-update-wizard/master/public/step4.png?raw=true "Git branch/commit")
+1. After installation, choose whether or not you'd like to generate a Git **branch** for your changes
+2. Then choose whether or not you'd like to make a separate Git **commit** for your changes.
+
+   A nice commit message with details about the update version range for each affected package will be generated for you.
+
+![Git](/public/git.gif?raw=true "Git")
+
+## Yarn support
+
+Lerna Update Wizard will automatically detect the package manager used for each package and use the appropriate one for installing the dependency.
+
+**Note:** If the project root directory contains a `yarn.lock` file, Yarn will be used to install all packages, in order to support Yarn Workspaces.
+
+#### NPM
+
+![NPM install](/public/npm.gif?raw=true "NPM install")
+
+#### Yarn
+
+![Yarn install](/public/yarn.gif?raw=true "Yarn install")
+
+### Note
+
+Lerna Update Wizard takes Lerna's `packages` config parameter into account if [specified in lerna.json](https://github.com/lerna/lerna#lernajson). This means that if you have your packages located in a directory other than `packages/`, this tool will still work, as long as their parent directory is specified.
