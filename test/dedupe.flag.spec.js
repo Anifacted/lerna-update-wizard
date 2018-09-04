@@ -54,7 +54,7 @@ describe("--dedupe flag", () => {
 
         >>> input lodash
 
-        ? Select a dependency to upgrade: tree
+        ? Select a dependency to upgrade: lodash
         ❯ lodash (2 versions)
 
         >>> input ENTER
