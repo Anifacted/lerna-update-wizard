@@ -7,7 +7,9 @@ Command line interface for simplifying the process of bulk updating dependencies
 ```bash
 $ yarn add lerna-update-wizard
 ```
+
 Or via NPM:
+
 ```bash
 $ npm install --save-dev lerna-update-wizard
 ```
@@ -36,7 +38,7 @@ $ lernaupdate ~/projects/my-lerna-project
 
 When running the command you will be prompted to search for and select the dependency you wish to install:
 
-![Select dependency](https://raw.githubusercontent.com/Anifacted/lerna-update-wizard/master/public/step1.png?raw=true "Select dependency")
+![Select dependency](https://raw.githubusercontent.com/Anifacted/lerna-update-wizard/master/public/update.png?raw=true "Select dependency")
 
 ### Step 2
 
