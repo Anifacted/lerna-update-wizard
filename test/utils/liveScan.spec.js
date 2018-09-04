@@ -31,7 +31,7 @@ describe("liveScan", () => {
         matchTarget:
           "? Select a dependency to upgrade: (Use arrow keys or type to search)",
         matchContext:
-          "Lerna Update Wizard\nv0.9.0\n\x1b[2K\x1b[G\x1b[2K\x1b[GStarting update wizard for project-a\n\x1b[2K\x1b[G",
+          "\x1b[2K\x1b[G\nLerna Update Wizard\nv0.9.0\n\n\x1b[2K\x1b[G\x1b[2K\x1b[GStarting update wizard for project-a\n\x1b[2K\x1b[G",
       }
     );
 

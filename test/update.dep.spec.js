@@ -24,13 +24,21 @@ describe("Update dependency", async () => {
         projectPath,
         `
         ? Select a dependency to upgrade: (Use arrow keys or type to search)
+        ❯ lodash (2 versions)
 
         >>> input lodash
 
+        ? Select a dependency to upgrade: lodash
         ❯ lodash (2 versions)
 
         >>> input ENTER
 
+        / Fetching package information for "lodash"
+
+        >>> wait
+
+        ? Select packages to affect: (Press <space> to select, <a> to toggle all, <i> to
+        invert selection)
         ❯◯ sub-package-a
         ◉ sub-package-b (0.1.0)
         ◯ sub-package-c
