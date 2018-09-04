@@ -53,7 +53,7 @@ $ lernaupdate ~/projects/my-lerna-project
 
 ![Add packages](/public/add.gif?raw=true "Add dependency")
 
-## Deduplicate dependencies across packages
+### Deduplicate dependencies across packages
 
 1. Run the command with the `--dedupe` option
 2. Only dependencies installed with 2 or more differing versions will be presented
@@ -61,7 +61,7 @@ $ lernaupdate ~/projects/my-lerna-project
 
 ![Deduplicate packages](/public/dedupe.gif?raw=true "Deduplicate dependency")
 
-## Auto-generate Git branch & commit
+### Auto-generate Git branch & commit
 
 1. After installation, choose whether or not you'd like to generate a Git **branch** for your changes
 2. Then choose whether or not you'd like to make a separate Git **commit** for your changes.
@@ -70,7 +70,7 @@ $ lernaupdate ~/projects/my-lerna-project
 
 ![Git](/public/git.gif?raw=true "Git")
 
-## Yarn support
+### Yarn support
 
 Lerna Update Wizard will automatically detect the package manager used for each package and use the appropriate one for installing the dependency.
 
@@ -84,6 +84,6 @@ Lerna Update Wizard will automatically detect the package manager used for each 
 
 ![Yarn install](/public/yarn.gif?raw=true "Yarn install")
 
-### Note
+### Notes
 
 Lerna Update Wizard takes Lerna's `packages` config parameter into account if [specified in lerna.json](https://github.com/lerna/lerna#lernajson). This means that if you have your packages located in a directory other than `packages/`, this tool will still work, as long as their parent directory is specified.
