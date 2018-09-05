@@ -39,9 +39,9 @@ module.exports = async ({ input, flags }) => {
   } catch (e) {}
 
   ui.logBottom(
-    `\n${chalk.bold("Lerna Update Wizard")} ${chalk.grey(
-      "v" + require("../package.json").version
-    )}`
+    chalk`\n{bold Lerna Update Wizard} {grey v${
+      require("../package.json").version
+    }}`
   );
 
   const packagesRead = await globby(
@@ -171,7 +171,7 @@ module.exports = async ({ input, flags }) => {
           results = [
             ...results,
             {
-              name: `${input} ${chalk.green.bold("[+ADD]")}`,
+              name: chalk`${input} {green.bold [+ADD]}`,
               value: input,
             },
           ];
@@ -247,7 +247,7 @@ module.exports = async ({ input, flags }) => {
       value: version,
     })),
     !isNewDependency && {
-      name: `${highestInstalled} ${chalk.bold("Highest installed")}`,
+      name: chalk`${highestInstalled} {bold Highest installed}`,
       value: highestInstalled,
     },
     ...npmVersions.filter(
@@ -415,7 +415,7 @@ module.exports = async ({ input, flags }) => {
 
     const createCmd = `git add . && git commit -m '${gitCommitMessage}' -m '${subMessage}'`;
     await runCommand(`cd ${projectDir} && ${createCmd}`, {
-      startMessage: `${chalk.white.bold(projectName)}: git add . && git commit`,
+      startMessage: chalk`{white.bold ${projectName}}: git add . && git commit`,
       endMessage: chalk.green(`Commit created ✓`),
       logOutput: false,
     });
