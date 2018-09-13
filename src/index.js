@@ -23,11 +23,8 @@ module.exports = async ({ input, flags }) => {
 
   const projectPackageJsonPath = resolve(projectDir, "package.json");
 
-  if (!await fileExists(projectPackageJsonPath)) {
-    ui.log.write(
-      chalk.red.bold("No 'package.json' found in specified directory")
-    );
-    process.exit();
+  if (!(await fileExists(projectPackageJsonPath))) {
+    throw new Error("No 'package.json' found in specified directory");
   }
 
   const { name: projectName } = require(projectPackageJsonPath);
@@ -59,8 +56,7 @@ module.exports = async ({ input, flags }) => {
   }));
 
   if (packages.length === 0) {
-    ui.log.write(chalk.red.bold("No packages found. Is this a Lerna project?"));
-    process.exit();
+    throw new Error("No packages found. Is this a Lerna project?");
   }
 
   ui.logBottom("");
@@ -197,12 +193,7 @@ module.exports = async ({ input, flags }) => {
   const npmPackageInfo = JSON.parse(npmPackageInfoRaw);
 
   if (npmPackageInfo.error) {
-    ui.log.write(
-      chalk.red.bold(
-        `There was an error looking up "${targetDependency}" in NPM registry`
-      )
-    );
-    process.exit();
+    throw new Error(`Could not look up "${targetDependency}" in NPM registry`);
   }
 
   const { targetPackages } = await inquirer.prompt([
