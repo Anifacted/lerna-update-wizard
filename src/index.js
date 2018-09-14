@@ -2,6 +2,7 @@ const path = require("path");
 const inquirer = require("inquirer");
 const chalk = require("chalk");
 const uniq = require("lodash/uniq");
+const orderBy = require("lodash/orderBy");
 const globby = require("globby");
 const semverCompare = require("semver-compare");
 const perf = require("execution-time")();
@@ -50,10 +51,13 @@ module.exports = async ({ input, flags }) => {
     { expandDirectories: true }
   );
 
-  const packages = packagesRead.map(path => ({
-    path: path.substr(0, path.length - "package.json".length),
-    config: require(path),
-  }));
+  const packages = orderBy(
+    packagesRead.map(path => ({
+      path: path.substr(0, path.length - "package.json".length),
+      config: require(path),
+    })),
+    "config.name"
+  );
 
   if (packages.length === 0) {
     throw new Error("No packages found. Is this a Lerna project?");
