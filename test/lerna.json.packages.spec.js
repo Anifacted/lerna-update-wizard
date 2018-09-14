@@ -114,8 +114,8 @@ describe("lerna.json `packages` configuration", () => {
         ? Select packages to affect: (Press <space> to select, <a> to toggle all, <i> to
          invert selection)
         ❯◯ sub-package-default
-         ◉ sub-package-myPackages (0.1.0)
          ◉ sub-package-foobarbaz (0.2.0)
+         ◉ sub-package-myPackages (0.1.0)
 
          >>> input SPACE
          >>> input ENTER

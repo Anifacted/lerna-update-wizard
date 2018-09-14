@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 const meow = require("meow");
+const chalk = require("chalk");
 
 const { input, flags } = meow(
   `
@@ -16,10 +17,13 @@ const { input, flags } = meow(
     flags: {
       dedupe: {
         type: "boolean",
-        alias: "d"
-      }
-    }
+        alias: "d",
+      },
+    },
   }
 );
 
-require("../src/index.js")({ input, flags });
+require("../src/index.js")({ input, flags }).catch(err => {
+  console.log(chalk`{red.bold An error occurred:}\n{bold ${err}}`);
+  process.exit(1);
+});
