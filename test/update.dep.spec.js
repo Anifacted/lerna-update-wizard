@@ -53,7 +53,7 @@ describe("Update dependency", async () => {
 
         >>> input ENTER
 
-        ? Select version to install: (Use arrow keys)
+        ? Select version to install:
 
         >>> input ARROW_UP
         >>> input ARROW_UP
@@ -124,7 +124,7 @@ describe("Update dependency", async () => {
 
         >>> input ENTER
 
-        ? Select version to install: (Use arrow keys)
+        ? Select version to install:
 
         >>> input ARROW_UP
         >>> input ARROW_UP
