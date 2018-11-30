@@ -400,9 +400,9 @@ module.exports = async ({ input, flags }) => {
   if (shouldCreateGitCommit) {
     const subMessage = targetPackages
       .reduce((prev, depName) => {
-        const { version: fromVersion } = dependencyMap[targetDependency].packs[
-          depName
-        ];
+        const fromVersion =
+          !isNewDependency &&
+          dependencyMap[targetDependency].packs[depName].version;
 
         if (fromVersion === targetVersion) return prev;
 
