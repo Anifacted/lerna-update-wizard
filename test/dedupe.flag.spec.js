@@ -64,7 +64,7 @@ describe("--dedupe flag", () => {
 
         >>> input ENTER
 
-        ? Select version to install: (Use arrow keys)
+        ? Select version to install:
 
         >>> input ARROW_DOWN
         >>> input ENTER

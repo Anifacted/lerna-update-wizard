@@ -18,6 +18,8 @@ inquirer.registerPrompt(
   require("inquirer-autocomplete-prompt")
 );
 
+inquirer.registerPrompt("semverList", require("./prompts/semverList"));
+
 module.exports = async ({ input, flags }) => {
   const { resolve } = path;
   const projectDir = input.shift() || ".";
@@ -256,7 +258,7 @@ module.exports = async ({ input, flags }) => {
 
   const { targetVersion } = await inquirer.prompt([
     {
-      type: "list",
+      type: "semverList",
       name: "targetVersion",
       message: "Select version to install:",
       pageSize: 10,

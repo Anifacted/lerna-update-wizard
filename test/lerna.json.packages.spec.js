@@ -55,7 +55,7 @@ describe("lerna.json `packages` configuration", () => {
 
         >>> input ENTER
 
-        ? Select version to install: (Use arrow keys)
+        ? Select version to install:
 
         >>> input ARROW_UP
         >>> input ENTER
@@ -120,7 +120,7 @@ describe("lerna.json `packages` configuration", () => {
          >>> input SPACE
          >>> input ENTER
 
-         ? Select version to install: (Use arrow keys)
+         ? Select version to install:
 
          >>> input ARROW_UP
          >>> input ENTER
