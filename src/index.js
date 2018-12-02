@@ -47,10 +47,12 @@ module.exports = async ({ input, flags }) => {
 
   ui.logBottom("Collecting packages...");
 
+  const defaultPackagesGlobs = flags.packages
+    ? flags.packages.split(",")
+    : lernaConfig.packages || ["packages/*"];
+
   const packagesRead = await globby(
-    (lernaConfig.packages || ["packages/*"]).map(glob =>
-      resolve(projectDir, glob, "package.json")
-    ),
+    defaultPackagesGlobs.map(glob => resolve(projectDir, glob, "package.json")),
     { expandDirectories: true }
   );
 
@@ -196,36 +198,43 @@ module.exports = async ({ input, flags }) => {
 
   const isNewDependency = !allDependencies.includes(targetDependency);
 
-  const { targetPackages } = await inquirer.prompt([
-    {
-      type: "checkbox",
-      name: "targetPackages",
-      message: "Select packages to affect:",
-      pageSize: 15,
-      choices: packages.map(({ config: { name: packageName } }) => {
-        if (isNewDependency) {
+  let targetPackages =
+    flags.packages && packages.map(({ config: { name } }) => name);
+
+  if (!targetPackages) {
+    const { targetPackages: promptedTarget } = await inquirer.prompt([
+      {
+        type: "checkbox",
+        name: "targetPackages",
+        message: "Select packages to affect:",
+        pageSize: 15,
+        choices: packages.map(({ config: { name: packageName } }) => {
+          if (isNewDependency) {
+            return {
+              name: packageName,
+              value: packageName,
+              checked: false,
+            };
+          }
+
+          const { version, source } =
+            dependencyMap[targetDependency].packs[packageName] || {};
+
+          const versionBit = version ? ` (${version})` : "";
+          const sourceBit =
+            source === "devDependencies" ? chalk.white(" (dev)") : "";
+
           return {
-            name: packageName,
+            name: `${packageName}${versionBit}${sourceBit}`,
             value: packageName,
-            checked: false,
+            checked: !!version,
           };
-        }
+        }),
+      },
+    ]);
 
-        const { version, source } =
-          dependencyMap[targetDependency].packs[packageName] || {};
-
-        const versionBit = version ? ` (${version})` : "";
-        const sourceBit =
-          source === "devDependencies" ? chalk.white(" (dev)") : "";
-
-        return {
-          name: `${packageName}${versionBit}${sourceBit}`,
-          value: packageName,
-          checked: !!version,
-        };
-      }),
-    },
-  ]);
+    targetPackages = promptedTarget;
+  }
 
   // Target version selection
   let targetVersion =
