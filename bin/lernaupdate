@@ -9,15 +9,21 @@ const { input, flags } = meow(
 
   Options:
     --dedupe, -d  List only dependencies that have a version conflict between one or more packages
+    --dependency, --dep  Specifiy dependency to update/add (Skips interactive step)
 
   Examples:
     $ lernaupdate ./myproject --dedupe
+    $ lernaupdate ./myproject --dependency "lodash@latest"
+    $ lernaupdate ./myproject --dependency "react@^1.6.1"
 `,
   {
     flags: {
       dedupe: {
         type: "boolean",
         alias: "d",
+      },
+      dependency: {
+        type: "string",
       },
     },
   }

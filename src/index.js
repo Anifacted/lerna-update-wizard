@@ -11,6 +11,7 @@ const runCommand = require("./utils/runCommand");
 const fileExists = require("./utils/fileExists");
 const ui = require("./utils/ui");
 const plural = require("./utils/plural");
+const parseDependency = require("./utils/parseDependency");
 const sanitizeGitBranchName = require("./utils/sanitizeGitBranchName");
 
 inquirer.registerPrompt(
@@ -140,67 +141,60 @@ module.exports = async ({ input, flags }) => {
   ui.log.write(`Starting update wizard for ${chalk.white.bold(projectName)}`);
   ui.log.write("");
 
-  const { targetDependency } = await inquirer.prompt([
-    {
-      type: "autocomplete",
-      name: "targetDependency",
-      message: "Select a dependency to upgrade:",
-      pageSize: 15,
-      source: (_ignore_, input) => {
-        const itemize = value => ({
-          value,
-          name: `${chalk.white(value)} ${chalk[dependencyMap[value].color](
-            `(${plural(
-              "version",
-              "versions",
-              dependencyMap[value].versions.length
-            )})`
-          )}`,
-        });
+  let targetDependency =
+    flags.dependency && parseDependency(flags.dependency).name;
 
-        const sorter = flags.dedupe
-          ? (a, b) =>
-              dependencyMap[b].versions.length -
-              dependencyMap[a].versions.length
-          : undefined;
+  if (!targetDependency) {
+    const { targetDependency: promptedTarget } = await inquirer.prompt([
+      {
+        type: "autocomplete",
+        name: "targetDependency",
+        message: "Select a dependency to upgrade:",
+        pageSize: 15,
+        source: (_ignore_, input) => {
+          const itemize = value => ({
+            value,
+            name: `${chalk.white(value)} ${chalk[dependencyMap[value].color](
+              `(${plural(
+                "version",
+                "versions",
+                dependencyMap[value].versions.length
+              )})`
+            )}`,
+          });
 
-        let results = input
-          ? allDependencies
-              .filter(name => new RegExp(input).test(name))
-              .sort(sorter)
-              .map(itemize)
-          : allDependencies.sort(sorter).map(itemize);
+          const sorter = flags.dedupe
+            ? (a, b) =>
+                dependencyMap[b].versions.length -
+                dependencyMap[a].versions.length
+            : undefined;
 
-        if (input && !allDependencies.includes(input)) {
-          results = [
-            ...results,
-            {
-              name: `${input} ${chalk.green.bold("[+ADD]")}`,
-              value: input,
-            },
-          ];
-        }
+          let results = input
+            ? allDependencies
+                .filter(name => new RegExp(input).test(name))
+                .sort(sorter)
+                .map(itemize)
+            : allDependencies.sort(sorter).map(itemize);
 
-        return Promise.resolve(results);
+          if (input && !allDependencies.includes(input)) {
+            results = [
+              ...results,
+              {
+                name: `${input} ${chalk.green.bold("[+ADD]")}`,
+                value: input,
+              },
+            ];
+          }
+
+          return Promise.resolve(results);
+        },
       },
-    },
-  ]);
+    ]);
+
+    targetDependency = promptedTarget;
+  }
 
   const isNewDependency = !allDependencies.includes(targetDependency);
-
-  const npmPackageInfoRaw = await runCommand(
-    `npm info ${targetDependency} versions dist-tags --json`,
-    {
-      startMessage: `Fetching package information for "${targetDependency}"`,
-      logOutput: false,
-    }
-  );
-
-  const npmPackageInfo = JSON.parse(npmPackageInfoRaw);
-
-  if (npmPackageInfo.error) {
-    throw new Error(`Could not look up "${targetDependency}" in NPM registry`);
-  }
 
   const { targetPackages } = await inquirer.prompt([
     {
@@ -233,38 +227,62 @@ module.exports = async ({ input, flags }) => {
     },
   ]);
 
-  const npmVersions = npmPackageInfo.versions.reverse();
-  const npmDistTags = npmPackageInfo["dist-tags"];
+  // Target version selection
+  let targetVersion =
+    flags.dependency && parseDependency(flags.dependency).version;
 
-  const highestInstalled =
-    !isNewDependency &&
-    dependencyMap[targetDependency].versions.sort(semverCompare).pop();
+  if (!targetVersion) {
+    const npmPackageInfoRaw = await runCommand(
+      `npm info ${targetDependency} versions dist-tags --json`,
+      {
+        startMessage: `Fetching package information for "${targetDependency}"`,
+        logOutput: false,
+      }
+    );
 
-  const availableVersions = [
-    ...Object.entries(npmDistTags).map(([tag, version]) => ({
-      name: `${version} ${chalk.bold(`#${tag}`)}`,
-      value: version,
-    })),
-    !isNewDependency && {
-      name: `${highestInstalled} ${chalk.bold("Highest installed")}`,
-      value: highestInstalled,
-    },
-    ...npmVersions.filter(
-      version =>
-        version !== highestInstalled &&
-        !Object.values(npmDistTags).includes(version)
-    ),
-  ].filter(Boolean);
+    const npmPackageInfo = JSON.parse(npmPackageInfoRaw);
 
-  const { targetVersion } = await inquirer.prompt([
-    {
-      type: "semverList",
-      name: "targetVersion",
-      message: "Select version to install:",
-      pageSize: 10,
-      choices: availableVersions,
-    },
-  ]);
+    if (npmPackageInfo.error) {
+      throw new Error(
+        `Could not look up "${targetDependency}" in NPM registry`
+      );
+    }
+
+    const npmVersions = npmPackageInfo.versions.reverse();
+    const npmDistTags = npmPackageInfo["dist-tags"];
+
+    const highestInstalled =
+      !isNewDependency &&
+      dependencyMap[targetDependency].versions.sort(semverCompare).pop();
+
+    const availableVersions = [
+      ...Object.entries(npmDistTags).map(([tag, version]) => ({
+        name: `${version} ${chalk.bold(`#${tag}`)}`,
+        value: version,
+      })),
+      !isNewDependency && {
+        name: `${highestInstalled} ${chalk.bold("Highest installed")}`,
+        value: highestInstalled,
+      },
+      ...npmVersions.filter(
+        version =>
+          version !== highestInstalled &&
+          !Object.values(npmDistTags).includes(version)
+      ),
+    ].filter(Boolean);
+
+    const { targetVersion: promptedTarget } = await inquirer.prompt([
+      {
+        type: "semverList",
+        name: "targetVersion",
+        message: "Select version to install:",
+        pageSize: 10,
+        choices: availableVersions,
+      },
+    ]);
+
+    targetVersion = promptedTarget;
+  }
 
   perf.start();
   let totalInstalls = 0;
