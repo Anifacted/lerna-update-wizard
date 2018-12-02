@@ -196,6 +196,23 @@ module.exports = async ({ input, flags }) => {
     targetDependency = promptedTarget;
   }
 
+  // Look up NPM dependency and its versions
+
+  const npmPackageInfoRaw = await runCommand(
+    `npm info ${targetDependency} versions dist-tags --json`,
+    {
+      startMessage: `Fetching package information for "${targetDependency}"`,
+      logOutput: false,
+    }
+  );
+
+  const npmPackageInfo = JSON.parse(npmPackageInfoRaw);
+
+  if (npmPackageInfo.error) {
+    throw new Error(`Could not look up "${targetDependency}" in NPM registry`);
+  }
+
+  // Target packages selection
   const isNewDependency = !allDependencies.includes(targetDependency);
 
   let targetPackages =
@@ -241,22 +258,6 @@ module.exports = async ({ input, flags }) => {
     flags.dependency && parseDependency(flags.dependency).version;
 
   if (!targetVersion) {
-    const npmPackageInfoRaw = await runCommand(
-      `npm info ${targetDependency} versions dist-tags --json`,
-      {
-        startMessage: `Fetching package information for "${targetDependency}"`,
-        logOutput: false,
-      }
-    );
-
-    const npmPackageInfo = JSON.parse(npmPackageInfoRaw);
-
-    if (npmPackageInfo.error) {
-      throw new Error(
-        `Could not look up "${targetDependency}" in NPM registry`
-      );
-    }
-
     const npmVersions = npmPackageInfo.versions.reverse();
     const npmDistTags = npmPackageInfo["dist-tags"];
 
