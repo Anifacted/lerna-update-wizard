@@ -47,11 +47,18 @@ const generateProject = async (options, log) => {
       await generateProject(
         {
           ...pOptions,
+          git: false,
           prefixPath: path.resolve(p, pOptions.moduleDirName || "packages"),
         },
         `└──${pOptions.name}`
       );
     }
+  }
+
+  if (options.git) {
+    await exec(
+      `cd ${p} && echo "node_modules" > .gitignore && git init && git add . && git commit -nam 'initial commit'`
+    );
   }
 };
 
