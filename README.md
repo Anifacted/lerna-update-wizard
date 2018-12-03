@@ -70,6 +70,28 @@ $ lernaupdate ~/projects/my-lerna-project
 
 ![Git](/public/git.gif?raw=true "Git")
 
+### Non-interactive mode
+
+The script can run without prompting you for input. Simply specify the `--non-interactive` flag:
+
+```bash
+$ lernaupdate --non-interactive --dependency lodash@4.2.1 ./my-project
+```
+
+The script will tell you if you need to specify any additional input flags based on the state of your mono repo.
+
+For instance, you might need/wish to include information about which packages to affect and which type of installation to perform if the dependency is a first-time install:
+
+```bash
+$ lernaupdate --non-interactive \
+              --dependency lodash@4.2.1 \
+              --packages packages/utils,packages/tools \
+              --new-installs-mode dev \
+              ./my-project
+```
+
+**Note: Git features are not available for `--non-interactive` mode.**
+
 ### Yarn support
 
 Lerna Update Wizard will automatically detect the package manager used for each package and use the appropriate one for installing the dependency.

@@ -11,6 +11,8 @@ const runCommand = require("./utils/runCommand");
 const fileExists = require("./utils/fileExists");
 const ui = require("./utils/ui");
 const plural = require("./utils/plural");
+const invariant = require("./utils/invariant");
+const parseDependency = require("./utils/parseDependency");
 const sanitizeGitBranchName = require("./utils/sanitizeGitBranchName");
 
 inquirer.registerPrompt(
@@ -24,11 +26,19 @@ module.exports = async ({ input, flags }) => {
   const { resolve } = path;
   const projectDir = input.shift() || ".";
 
+  // Validate flags
+  flags.nonInteractive &&
+    invariant(
+      flags.dependency,
+      "`--dependency` option must be specified in non-interactive mode"
+    );
+
   const projectPackageJsonPath = resolve(projectDir, "package.json");
 
-  if (!(await fileExists(projectPackageJsonPath))) {
-    throw new Error("No 'package.json' found in specified directory");
-  }
+  invariant(
+    await fileExists(projectPackageJsonPath),
+    "No 'package.json' found in specified directory"
+  );
 
   const { name: projectName } = require(projectPackageJsonPath);
 
@@ -46,10 +56,12 @@ module.exports = async ({ input, flags }) => {
 
   ui.logBottom("Collecting packages...");
 
+  const defaultPackagesGlobs = flags.packages
+    ? flags.packages.split(",")
+    : lernaConfig.packages || ["packages/*"];
+
   const packagesRead = await globby(
-    (lernaConfig.packages || ["packages/*"]).map(glob =>
-      resolve(projectDir, glob, "package.json")
-    ),
+    defaultPackagesGlobs.map(glob => resolve(projectDir, glob, "package.json")),
     { expandDirectories: true }
   );
 
@@ -61,9 +73,7 @@ module.exports = async ({ input, flags }) => {
     "config.name"
   );
 
-  if (packages.length === 0) {
-    throw new Error("No packages found. Is this a Lerna project?");
-  }
+  invariant(packages.length > 0, "No packages found. Is this a Lerna project?");
 
   ui.logBottom("");
 
@@ -140,53 +150,60 @@ module.exports = async ({ input, flags }) => {
   ui.log.write(`Starting update wizard for ${chalk.white.bold(projectName)}`);
   ui.log.write("");
 
-  const { targetDependency } = await inquirer.prompt([
-    {
-      type: "autocomplete",
-      name: "targetDependency",
-      message: "Select a dependency to upgrade:",
-      pageSize: 15,
-      source: (_ignore_, input) => {
-        const itemize = value => ({
-          value,
-          name: `${chalk.white(value)} ${chalk[dependencyMap[value].color](
-            `(${plural(
-              "version",
-              "versions",
-              dependencyMap[value].versions.length
-            )})`
-          )}`,
-        });
+  let targetDependency =
+    flags.dependency && parseDependency(flags.dependency).name;
 
-        const sorter = flags.dedupe
-          ? (a, b) =>
-              dependencyMap[b].versions.length -
-              dependencyMap[a].versions.length
-          : undefined;
+  if (!targetDependency) {
+    const { targetDependency: promptedTarget } = await inquirer.prompt([
+      {
+        type: "autocomplete",
+        name: "targetDependency",
+        message: "Select a dependency to upgrade:",
+        pageSize: 15,
+        source: (_ignore_, input) => {
+          const itemize = value => ({
+            value,
+            name: `${chalk.white(value)} ${chalk[dependencyMap[value].color](
+              `(${plural(
+                "version",
+                "versions",
+                dependencyMap[value].versions.length
+              )})`
+            )}`,
+          });
 
-        let results = input
-          ? allDependencies
-              .filter(name => new RegExp(input).test(name))
-              .sort(sorter)
-              .map(itemize)
-          : allDependencies.sort(sorter).map(itemize);
+          const sorter = flags.dedupe
+            ? (a, b) =>
+                dependencyMap[b].versions.length -
+                dependencyMap[a].versions.length
+            : undefined;
 
-        if (input && !allDependencies.includes(input)) {
-          results = [
-            ...results,
-            {
-              name: `${input} ${chalk.green.bold("[+ADD]")}`,
-              value: input,
-            },
-          ];
-        }
+          let results = input
+            ? allDependencies
+                .filter(name => new RegExp(input).test(name))
+                .sort(sorter)
+                .map(itemize)
+            : allDependencies.sort(sorter).map(itemize);
 
-        return Promise.resolve(results);
+          if (input && !allDependencies.includes(input)) {
+            results = [
+              ...results,
+              {
+                name: `${input} ${chalk.green.bold("[+ADD]")}`,
+                value: input,
+              },
+            ];
+          }
+
+          return Promise.resolve(results);
+        },
       },
-    },
-  ]);
+    ]);
 
-  const isNewDependency = !allDependencies.includes(targetDependency);
+    targetDependency = promptedTarget;
+  }
+
+  // Look up NPM dependency and its versions
 
   const npmPackageInfoRaw = await runCommand(
     `npm info ${targetDependency} versions dist-tags --json`,
@@ -202,69 +219,117 @@ module.exports = async ({ input, flags }) => {
     throw new Error(`Could not look up "${targetDependency}" in NPM registry`);
   }
 
-  const { targetPackages } = await inquirer.prompt([
-    {
-      type: "checkbox",
-      name: "targetPackages",
-      message: "Select packages to affect:",
-      pageSize: 15,
-      choices: packages.map(({ config: { name: packageName } }) => {
-        if (isNewDependency) {
+  // Target packages selection
+  const isNewDependency = !allDependencies.includes(targetDependency);
+
+  if (flags.nonInteractive && isNewDependency) {
+    invariant(
+      flags.newInstallsMode,
+      `"${targetDependency}" is a first-time install for one or more packages.`,
+      "In non-interactive mode you must specify the --new-installs-mode flag (prod|dev|peer) in this situation."
+    );
+  }
+
+  let targetPackages;
+
+  if (flags.nonInteractive && !flags.packages) {
+    const installedPackages = packages
+      .filter(
+        ({ config: { name } }) =>
+          !!(
+            dependencyMap[targetDependency] &&
+            dependencyMap[targetDependency].packs[name]
+          )
+      )
+      .map(({ config: { name } }) => name);
+
+    invariant(
+      installedPackages.length > 0,
+      `No packages contain the dependency "${targetDependency}".`,
+      "In non-interactive mode you must specify the --packages flag in this situation,",
+      "so the script can know which packages install it in."
+    );
+
+    targetPackages = installedPackages;
+  } else if (flags.packages) {
+    targetPackages = packages.map(({ config: { name } }) => name);
+  }
+
+  if (!targetPackages) {
+    const { targetPackages: promptedTarget } = await inquirer.prompt([
+      {
+        type: "checkbox",
+        name: "targetPackages",
+        message: "Select packages to affect:",
+        pageSize: 15,
+        choices: packages.map(({ config: { name: packageName } }) => {
+          if (isNewDependency) {
+            return {
+              name: packageName,
+              value: packageName,
+              checked: false,
+            };
+          }
+
+          const { version, source } =
+            dependencyMap[targetDependency].packs[packageName] || {};
+
+          const versionBit = version ? ` (${version})` : "";
+          const sourceBit =
+            source === "devDependencies" ? chalk.white(" (dev)") : "";
+
           return {
-            name: packageName,
+            name: `${packageName}${versionBit}${sourceBit}`,
             value: packageName,
-            checked: false,
+            checked: !!version,
           };
-        }
+        }),
+      },
+    ]);
 
-        const { version, source } =
-          dependencyMap[targetDependency].packs[packageName] || {};
+    targetPackages = promptedTarget;
+  }
 
-        const versionBit = version ? ` (${version})` : "";
-        const sourceBit =
-          source === "devDependencies" ? chalk.white(" (dev)") : "";
+  // Target version selection
+  let targetVersion =
+    flags.dependency && parseDependency(flags.dependency).version;
 
-        return {
-          name: `${packageName}${versionBit}${sourceBit}`,
-          value: packageName,
-          checked: !!version,
-        };
-      }),
-    },
-  ]);
+  if (!targetVersion) {
+    const npmVersions = npmPackageInfo.versions.reverse();
+    const npmDistTags = npmPackageInfo["dist-tags"];
 
-  const npmVersions = npmPackageInfo.versions.reverse();
-  const npmDistTags = npmPackageInfo["dist-tags"];
+    const highestInstalled =
+      !isNewDependency &&
+      dependencyMap[targetDependency].versions.sort(semverCompare).pop();
 
-  const highestInstalled =
-    !isNewDependency &&
-    dependencyMap[targetDependency].versions.sort(semverCompare).pop();
+    const availableVersions = [
+      ...Object.entries(npmDistTags).map(([tag, version]) => ({
+        name: `${version} ${chalk.bold(`#${tag}`)}`,
+        value: version,
+      })),
+      !isNewDependency && {
+        name: `${highestInstalled} ${chalk.bold("Highest installed")}`,
+        value: highestInstalled,
+      },
+      ...npmVersions.filter(
+        version =>
+          version !== highestInstalled &&
+          !Object.values(npmDistTags).includes(version)
+      ),
+    ].filter(Boolean);
 
-  const availableVersions = [
-    ...Object.entries(npmDistTags).map(([tag, version]) => ({
-      name: `${version} ${chalk.bold(`#${tag}`)}`,
-      value: version,
-    })),
-    !isNewDependency && {
-      name: `${highestInstalled} ${chalk.bold("Highest installed")}`,
-      value: highestInstalled,
-    },
-    ...npmVersions.filter(
-      version =>
-        version !== highestInstalled &&
-        !Object.values(npmDistTags).includes(version)
-    ),
-  ].filter(Boolean);
+    const { targetVersion: promptedTarget } = await inquirer.prompt([
+      {
+        type: "semverList",
+        name: "targetVersion",
+        message: "Select version to install:",
+        pageSize: 10,
+        choices: availableVersions,
+      },
+    ]);
 
-  const { targetVersion } = await inquirer.prompt([
-    {
-      type: "semverList",
-      name: "targetVersion",
-      message: "Select version to install:",
-      pageSize: 10,
-      choices: availableVersions,
-    },
-  ]);
+    targetVersion = promptedTarget;
+  }
 
   perf.start();
   let totalInstalls = 0;
@@ -294,7 +359,7 @@ module.exports = async ({ input, flags }) => {
         ui.log.write("");
         continue;
       }
-    } else {
+    } else if (!flags.newInstallsMode) {
       const { targetSource } = await inquirer.prompt([
         {
           type: "list",
@@ -310,6 +375,12 @@ module.exports = async ({ input, flags }) => {
       ]);
 
       source = targetSource;
+    } else {
+      source = {
+        prod: "dependencies",
+        dev: "devDependencies",
+        peer: "peerDependencies",
+      }[flags.newInstallsMode];
     }
 
     const { path: packageDir } = packages.find(
@@ -347,76 +418,84 @@ module.exports = async ({ input, flags }) => {
     chalk.bold(`Installed ${totalInstalls} packages in ${perf.stop().words}`)
   );
 
-  const userName = (
-    (await runCommand("git config --get github.user", { logOutput: false })) ||
-    (await runCommand("whoami", { logOutput: false })) ||
-    "upgrade"
-  )
-    .split("\n")
-    .shift();
+  if (!flags.nonInteractive) {
+    const userName = (
+      (await runCommand("git config --get github.user", {
+        logOutput: false,
+      })) ||
+      (await runCommand("whoami", { logOutput: false })) ||
+      "upgrade"
+    )
+      .split("\n")
+      .shift();
 
-  const {
-    shouldCreateGitBranch,
-    shouldCreateGitCommit,
-    gitBranchName,
-    gitCommitMessage,
-  } = await inquirer.prompt([
-    {
-      type: "confirm",
-      name: "shouldCreateGitBranch",
-      message: "Do you want to create a new git branch for the change?",
-    },
-    {
-      type: "input",
-      name: "gitBranchName",
-      message: "Enter a name for your branch:",
-      when: ({ shouldCreateGitBranch }) => shouldCreateGitBranch,
-      default: sanitizeGitBranchName(
-        `${userName}/${targetDependency}-${targetVersion}`
-      ),
-    },
-    {
-      type: "confirm",
-      name: "shouldCreateGitCommit",
-      message: "Do you want to create a new git commit for the change?",
-    },
-    {
-      type: "input",
-      name: "gitCommitMessage",
-      message: "Enter a git commit message:",
-      when: ({ shouldCreateGitCommit }) => shouldCreateGitCommit,
-      default: `Upgrade dependency: ${targetDependency}@${targetVersion}`,
-    },
-  ]);
+    const {
+      shouldCreateGitBranch,
+      shouldCreateGitCommit,
+      gitBranchName,
+      gitCommitMessage,
+    } = await inquirer.prompt([
+      {
+        type: "confirm",
+        name: "shouldCreateGitBranch",
+        message: "Do you want to create a new git branch for the change?",
+      },
+      {
+        type: "input",
+        name: "gitBranchName",
+        message: "Enter a name for your branch:",
+        when: ({ shouldCreateGitBranch }) => shouldCreateGitBranch,
+        default: sanitizeGitBranchName(
+          `${userName}/${targetDependency}-${targetVersion}`
+        ),
+      },
+      {
+        type: "confirm",
+        name: "shouldCreateGitCommit",
+        message: "Do you want to create a new git commit for the change?",
+      },
+      {
+        type: "input",
+        name: "gitCommitMessage",
+        message: "Enter a git commit message:",
+        when: ({ shouldCreateGitCommit }) => shouldCreateGitCommit,
+        default: `Upgrade dependency: ${targetDependency}@${targetVersion}`,
+      },
+    ]);
 
-  if (shouldCreateGitBranch) {
-    const createCmd = `git checkout -b ${gitBranchName}`;
-    await runCommand(`cd ${projectDir} && ${createCmd}`, {
-      startMessage: `${chalk.white.bold(projectName)}: ${createCmd}`,
-      endMessage: chalk.green(`Branch created ✓`),
-    });
-  }
+    if (shouldCreateGitBranch) {
+      const createCmd = `git checkout -b ${gitBranchName}`;
+      await runCommand(`cd ${projectDir} && ${createCmd}`, {
+        startMessage: `${chalk.white.bold(projectName)}: ${createCmd}`,
+        endMessage: chalk.green(`Branch created ✓`),
+      });
+    }
 
-  if (shouldCreateGitCommit) {
-    const subMessage = targetPackages
-      .reduce((prev, depName) => {
-        const fromVersion =
-          !isNewDependency &&
-          dependencyMap[targetDependency].packs[depName].version;
+    if (shouldCreateGitCommit) {
+      const subMessage = targetPackages
+        .reduce((prev, depName) => {
+          const fromVersion =
+            !isNewDependency &&
+            dependencyMap[targetDependency].packs[depName].version;
 
-        if (fromVersion === targetVersion) return prev;
+          if (fromVersion === targetVersion) return prev;
 
-        return fromVersion
-          ? [...prev, `* ${depName}: ${fromVersion} →  ${targetVersion}`]
-          : [...prev, `* ${depName}: ${targetVersion}`];
-      }, [])
-      .join("\n");
+          return fromVersion
+            ? [...prev, `* ${depName}: ${fromVersion} →  ${targetVersion}`]
+            : [...prev, `* ${depName}: ${targetVersion}`];
+        }, [])
+        .join("\n");
 
-    const createCmd = `git add . && git commit -m '${gitCommitMessage}' -m '${subMessage}'`;
-    await runCommand(`cd ${projectDir} && ${createCmd}`, {
-      startMessage: `${chalk.white.bold(projectName)}: git add . && git commit`,
-      endMessage: chalk.green(`Commit created ✓`),
-      logOutput: false,
-    });
+      const createCmd = `git add . && git commit -m '${gitCommitMessage}' -m '${subMessage}'`;
+      await runCommand(`cd ${projectDir} && ${createCmd}`, {
+        startMessage: `${chalk.white.bold(
+          projectName
+        )}: git add . && git commit`,
+        endMessage: chalk.green(`Commit created ✓`),
+        logOutput: false,
+      });
+    }
+  } else {
+    process.exit();
   }
 };

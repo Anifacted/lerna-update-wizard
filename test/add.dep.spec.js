@@ -91,4 +91,61 @@ describe("Adding new dependency", async () => {
       "to be true"
     );
   });
+
+  describe("non-interactive", () => {
+    it("Adds the dependency via the --dependency flag", async () => {
+      // eslint-disable-next-line
+      jest.setTimeout(100000);
+
+      const projectPath = await generateProject({
+        name: "project-add-dependency-non-interactive",
+        packages: [
+          { name: "sub-package-a" },
+          {
+            name: "sub-package-b",
+            dependencies: { treediff: "0.1.0" },
+          },
+          { name: "sub-package-c" },
+          { name: "sub-package-d", dependencies: { lodash: "0.2.0" } },
+        ],
+      });
+
+      await runProgram(
+        projectPath,
+        `
+        ❯◯ sub-package-a
+         ◯ sub-package-b
+         ◯ sub-package-c
+         ◯ sub-package-d
+
+        >>> input SPACE
+
+        ❯◉ sub-package-a
+
+        >>> input ENTER
+
+        Select dependency installation type for "sub-package-a"
+
+        >>> input ENTER
+
+        ? Do you want to create a new git branch for the change? (Y/n)
+
+        >>> input CTRL+C
+        `,
+        {
+          flags: "--dependency promise-react-component@0.0.2",
+        }
+      );
+
+      expect(
+        await fileExists(
+          resolve(
+            projectPath,
+            "packages/sub-package-a/node_modules/promise-react-component/package.json"
+          )
+        ),
+        "to be true"
+      );
+    });
+  });
 });
