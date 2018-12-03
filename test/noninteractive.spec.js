@@ -17,8 +17,8 @@ describe("Noninteractive mode", () => {
       await runProgram(
         projectPath,
         `An error occurred:
-        Error: \`--dependency\` option must be specified in noninteractive mode`,
-        { flags: "--noninteractive" }
+        Error: \`--dependency\` option must be specified in non-interactive mode`,
+        { flags: "--non-interactive" }
       );
     });
   });
@@ -39,8 +39,8 @@ describe("Noninteractive mode", () => {
           `
           An error occurred:
           Error: "lodash" is a first-time install for one or more packages.
-          In noninteractive-mode you must specify the --new-installs-mode flag (prod|dev|peer) in this situation.`,
-          { flags: "--noninteractive --dependency lodash@0.2.1" }
+          In non-interactive mode you must specify the --new-installs-mode flag (prod|dev|peer) in this situation.`,
+          { flags: "--non-interactive --dependency lodash@0.2.1" }
         );
       });
     });
@@ -53,11 +53,11 @@ describe("Noninteractive mode", () => {
             `
             An error occurred:
             Error: No packages contain the dependency "lodash".
-            In noninteractive-mode you must specify the --packages flag in this situation,
+            In non-interactive mode you must specify the --packages flag in this situation,
             so the script can know which packages install it in.`,
             {
               flags:
-                "--noninteractive --dependency lodash@0.2.1 --new-installs-mode dev",
+                "--non-interactive --dependency lodash@0.2.1 --new-installs-mode dev",
             }
           );
         });
@@ -67,7 +67,7 @@ describe("Noninteractive mode", () => {
         it("should complain about missing flag", async () => {
           await runProgram(projectPath, `Installed 1 packages in`, {
             flags:
-              "--noninteractive --dependency lodash@0.2.1 --new-installs-mode dev --packages packages/sub-package",
+              "--non-interactive --dependency lodash@0.2.1 --new-installs-mode dev --packages packages/sub-package",
           });
 
           expect(
@@ -98,7 +98,7 @@ describe("Noninteractive mode", () => {
       });
 
       await runProgram(projectPath, `Installed 1 packages in`, {
-        flags: "--noninteractive --dependency lodash@0.2.1",
+        flags: "--non-interactive --dependency lodash@0.2.1",
       });
 
       expect(

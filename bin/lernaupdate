@@ -30,7 +30,7 @@ const { input, flags } = meow(
     $ lernaupdate ./myproject --packages "packages/test-*,packages/fixtures"
     $ lernaupdate ./myproject --packages "packages/*"
 
-    $ lernaupdate ./myproject --noninteractive --dependency "react@latest" --new-installs-mode dev
+    $ lernaupdate ./myproject --non-interactive --dependency "react@latest" --new-installs-mode dev
 `,
   {
     flags: {
@@ -44,7 +44,7 @@ const { input, flags } = meow(
       packages: {
         type: "string",
       },
-      noninteractive: {
+      nonInteractive: {
         type: "boolean",
       },
       newIntallsMode: {

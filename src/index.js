@@ -27,10 +27,10 @@ module.exports = async ({ input, flags }) => {
   const projectDir = input.shift() || ".";
 
   // Validate flags
-  flags.noninteractive &&
+  flags.nonInteractive &&
     invariant(
       flags.dependency,
-      "`--dependency` option must be specified in noninteractive mode"
+      "`--dependency` option must be specified in non-interactive mode"
     );
 
   const projectPackageJsonPath = resolve(projectDir, "package.json");
@@ -222,17 +222,17 @@ module.exports = async ({ input, flags }) => {
   // Target packages selection
   const isNewDependency = !allDependencies.includes(targetDependency);
 
-  if (flags.noninteractive && isNewDependency) {
+  if (flags.nonInteractive && isNewDependency) {
     invariant(
       flags.newInstallsMode,
       `"${targetDependency}" is a first-time install for one or more packages.`,
-      "In noninteractive-mode you must specify the --new-installs-mode flag (prod|dev|peer) in this situation."
+      "In non-interactive mode you must specify the --new-installs-mode flag (prod|dev|peer) in this situation."
     );
   }
 
   let targetPackages;
 
-  if (flags.noninteractive && !flags.packages) {
+  if (flags.nonInteractive && !flags.packages) {
     const installedPackages = packages
       .filter(
         ({ config: { name } }) =>
@@ -246,7 +246,7 @@ module.exports = async ({ input, flags }) => {
     invariant(
       installedPackages.length > 0,
       `No packages contain the dependency "${targetDependency}".`,
-      "In noninteractive-mode you must specify the --packages flag in this situation,",
+      "In non-interactive mode you must specify the --packages flag in this situation,",
       "so the script can know which packages install it in."
     );
 
@@ -418,7 +418,7 @@ module.exports = async ({ input, flags }) => {
     chalk.bold(`Installed ${totalInstalls} packages in ${perf.stop().words}`)
   );
 
-  if (!flags.noninteractive) {
+  if (!flags.nonInteractive) {
     const userName = (
       (await runCommand("git config --get github.user", {
         logOutput: false,
