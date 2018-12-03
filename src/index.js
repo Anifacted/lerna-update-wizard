@@ -11,6 +11,7 @@ const runCommand = require("./utils/runCommand");
 const fileExists = require("./utils/fileExists");
 const ui = require("./utils/ui");
 const plural = require("./utils/plural");
+const invariant = require("./utils/invariant");
 const parseDependency = require("./utils/parseDependency");
 const sanitizeGitBranchName = require("./utils/sanitizeGitBranchName");
 
@@ -25,11 +26,19 @@ module.exports = async ({ input, flags }) => {
   const { resolve } = path;
   const projectDir = input.shift() || ".";
 
+  // Validate flags
+  flags.noninteractive &&
+    invariant(
+      flags.dependency,
+      "`--dependency` option must be specified in noninteractive mode"
+    );
+
   const projectPackageJsonPath = resolve(projectDir, "package.json");
 
-  if (!(await fileExists(projectPackageJsonPath))) {
-    throw new Error("No 'package.json' found in specified directory");
-  }
+  invariant(
+    await fileExists(projectPackageJsonPath),
+    "No 'package.json' found in specified directory"
+  );
 
   const { name: projectName } = require(projectPackageJsonPath);
 
@@ -64,9 +73,7 @@ module.exports = async ({ input, flags }) => {
     "config.name"
   );
 
-  if (packages.length === 0) {
-    throw new Error("No packages found. Is this a Lerna project?");
-  }
+  invariant(packages.length > 0, "No packages found. Is this a Lerna project?");
 
   ui.logBottom("");
 
@@ -215,8 +222,38 @@ module.exports = async ({ input, flags }) => {
   // Target packages selection
   const isNewDependency = !allDependencies.includes(targetDependency);
 
-  let targetPackages =
-    flags.packages && packages.map(({ config: { name } }) => name);
+  if (flags.noninteractive && isNewDependency) {
+    invariant(
+      flags.newInstallsMode,
+      `"${targetDependency}" is a first-time install for one or more packages.`,
+      "In noninteractive-mode you must specify the --new-installs-mode flag (prod|dev|peer) in this situation."
+    );
+  }
+
+  let targetPackages;
+
+  if (flags.noninteractive && !flags.packages) {
+    const installedPackages = packages
+      .filter(
+        ({ config: { name } }) =>
+          !!(
+            dependencyMap[targetDependency] &&
+            dependencyMap[targetDependency].packs[name]
+          )
+      )
+      .map(({ config: { name } }) => name);
+
+    invariant(
+      installedPackages.length > 0,
+      `No packages contain the dependency "${targetDependency}".`,
+      "In noninteractive-mode you must specify the --packages flag in this situation,",
+      "so the script can know which packages install it in."
+    );
+
+    targetPackages = installedPackages;
+  } else if (flags.packages) {
+    targetPackages = packages.map(({ config: { name } }) => name);
+  }
 
   if (!targetPackages) {
     const { targetPackages: promptedTarget } = await inquirer.prompt([
@@ -322,7 +359,7 @@ module.exports = async ({ input, flags }) => {
         ui.log.write("");
         continue;
       }
-    } else {
+    } else if (!flags.newInstallsMode) {
       const { targetSource } = await inquirer.prompt([
         {
           type: "list",
@@ -338,6 +375,12 @@ module.exports = async ({ input, flags }) => {
       ]);
 
       source = targetSource;
+    } else {
+      source = {
+        prod: "dependencies",
+        dev: "devDependencies",
+        peer: "peerDependencies",
+      }[flags.newInstallsMode];
     }
 
     const { path: packageDir } = packages.find(
@@ -375,76 +418,84 @@ module.exports = async ({ input, flags }) => {
     chalk.bold(`Installed ${totalInstalls} packages in ${perf.stop().words}`)
   );
 
-  const userName = (
-    (await runCommand("git config --get github.user", { logOutput: false })) ||
-    (await runCommand("whoami", { logOutput: false })) ||
-    "upgrade"
-  )
-    .split("\n")
-    .shift();
+  if (!flags.noninteractive) {
+    const userName = (
+      (await runCommand("git config --get github.user", {
+        logOutput: false,
+      })) ||
+      (await runCommand("whoami", { logOutput: false })) ||
+      "upgrade"
+    )
+      .split("\n")
+      .shift();
 
-  const {
-    shouldCreateGitBranch,
-    shouldCreateGitCommit,
-    gitBranchName,
-    gitCommitMessage,
-  } = await inquirer.prompt([
-    {
-      type: "confirm",
-      name: "shouldCreateGitBranch",
-      message: "Do you want to create a new git branch for the change?",
-    },
-    {
-      type: "input",
-      name: "gitBranchName",
-      message: "Enter a name for your branch:",
-      when: ({ shouldCreateGitBranch }) => shouldCreateGitBranch,
-      default: sanitizeGitBranchName(
-        `${userName}/${targetDependency}-${targetVersion}`
-      ),
-    },
-    {
-      type: "confirm",
-      name: "shouldCreateGitCommit",
-      message: "Do you want to create a new git commit for the change?",
-    },
-    {
-      type: "input",
-      name: "gitCommitMessage",
-      message: "Enter a git commit message:",
-      when: ({ shouldCreateGitCommit }) => shouldCreateGitCommit,
-      default: `Upgrade dependency: ${targetDependency}@${targetVersion}`,
-    },
-  ]);
+    const {
+      shouldCreateGitBranch,
+      shouldCreateGitCommit,
+      gitBranchName,
+      gitCommitMessage,
+    } = await inquirer.prompt([
+      {
+        type: "confirm",
+        name: "shouldCreateGitBranch",
+        message: "Do you want to create a new git branch for the change?",
+      },
+      {
+        type: "input",
+        name: "gitBranchName",
+        message: "Enter a name for your branch:",
+        when: ({ shouldCreateGitBranch }) => shouldCreateGitBranch,
+        default: sanitizeGitBranchName(
+          `${userName}/${targetDependency}-${targetVersion}`
+        ),
+      },
+      {
+        type: "confirm",
+        name: "shouldCreateGitCommit",
+        message: "Do you want to create a new git commit for the change?",
+      },
+      {
+        type: "input",
+        name: "gitCommitMessage",
+        message: "Enter a git commit message:",
+        when: ({ shouldCreateGitCommit }) => shouldCreateGitCommit,
+        default: `Upgrade dependency: ${targetDependency}@${targetVersion}`,
+      },
+    ]);
 
-  if (shouldCreateGitBranch) {
-    const createCmd = `git checkout -b ${gitBranchName}`;
-    await runCommand(`cd ${projectDir} && ${createCmd}`, {
-      startMessage: `${chalk.white.bold(projectName)}: ${createCmd}`,
-      endMessage: chalk.green(`Branch created ✓`),
-    });
-  }
+    if (shouldCreateGitBranch) {
+      const createCmd = `git checkout -b ${gitBranchName}`;
+      await runCommand(`cd ${projectDir} && ${createCmd}`, {
+        startMessage: `${chalk.white.bold(projectName)}: ${createCmd}`,
+        endMessage: chalk.green(`Branch created ✓`),
+      });
+    }
 
-  if (shouldCreateGitCommit) {
-    const subMessage = targetPackages
-      .reduce((prev, depName) => {
-        const fromVersion =
-          !isNewDependency &&
-          dependencyMap[targetDependency].packs[depName].version;
+    if (shouldCreateGitCommit) {
+      const subMessage = targetPackages
+        .reduce((prev, depName) => {
+          const fromVersion =
+            !isNewDependency &&
+            dependencyMap[targetDependency].packs[depName].version;
 
-        if (fromVersion === targetVersion) return prev;
+          if (fromVersion === targetVersion) return prev;
 
-        return fromVersion
-          ? [...prev, `* ${depName}: ${fromVersion} →  ${targetVersion}`]
-          : [...prev, `* ${depName}: ${targetVersion}`];
-      }, [])
-      .join("\n");
+          return fromVersion
+            ? [...prev, `* ${depName}: ${fromVersion} →  ${targetVersion}`]
+            : [...prev, `* ${depName}: ${targetVersion}`];
+        }, [])
+        .join("\n");
 
-    const createCmd = `git add . && git commit -m '${gitCommitMessage}' -m '${subMessage}'`;
-    await runCommand(`cd ${projectDir} && ${createCmd}`, {
-      startMessage: `${chalk.white.bold(projectName)}: git add . && git commit`,
-      endMessage: chalk.green(`Commit created ✓`),
-      logOutput: false,
-    });
+      const createCmd = `git add . && git commit -m '${gitCommitMessage}' -m '${subMessage}'`;
+      await runCommand(`cd ${projectDir} && ${createCmd}`, {
+        startMessage: `${chalk.white.bold(
+          projectName
+        )}: git add . && git commit`,
+        endMessage: chalk.green(`Commit created ✓`),
+        logOutput: false,
+      });
+    }
+  } else {
+    process.exit();
   }
 };
