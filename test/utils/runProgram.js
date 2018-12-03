@@ -99,7 +99,7 @@ module.exports.run = run;
 module.exports.default = (
   projectPath,
   inputSequence,
-  { log = !!process.env.CI || !!process.env.DEBUG } = {}
+  { log = !!process.env.CI || !!process.env.DEBUG, flags = "" } = {}
 ) => {
   const program =
     typeof inputSequence === "string"
@@ -110,7 +110,7 @@ module.exports.default = (
 
   log && console.info("Running program", JSON.stringify(program, null, 2));
 
-  const cmd = `./bin/lernaupdate ${projectPath}`;
+  const cmd = `./bin/lernaupdate${flags && ` ${flags}`} ${projectPath}`;
   const proc = spawn(cmd, { shell: true });
 
   const logFilePath = `./tmp/test-log.txt`;
