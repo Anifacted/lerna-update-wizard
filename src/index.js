@@ -331,6 +331,27 @@ module.exports = async ({ input, flags }) => {
     targetVersion = promptedTarget;
   }
 
+  let targetVersionResolved = targetVersion;
+
+  targetVersionResolved = (await runCommand(
+    `npm info ${targetDependency}@${targetVersion} version`,
+    {
+      startMessage: `Resolving dependency version for "${targetDependency}@${targetVersion}"`,
+      logOutput: false,
+    }
+  )).trim();
+
+  invariant(
+    targetVersionResolved,
+    `The version "${targetVersion}" was not found for "${targetDependency}"`
+  );
+
+  if (npmPackageInfo["dist-tags"][targetVersion]) {
+    targetVersionResolved = `^${targetVersionResolved}`;
+  }
+
+  ui.log.write(chalk.green(`Using version ${targetVersionResolved} ✓`));
+
   perf.start();
   let totalInstalls = 0;
 
@@ -398,18 +419,37 @@ module.exports = async ({ input, flags }) => {
       },
     }[dependencyManager][source || "dependencies"];
 
-    const installCmd = (dependencyManager === "yarn"
-      ? ["yarn", "add", sourceParam, `${targetDependency}@${targetVersion}`]
-      : ["npm", "install", sourceParam, `${targetDependency}@${targetVersion}`]
-    ).join(" ");
+    if (true) {
+      const targetPackageJson = require(resolve(packageDir, "package.json"));
 
-    await runCommand(`cd ${packageDir} && ${installCmd}`, {
-      startMessage: `${chalk.white.bold(depName)}: ${installCmd}`,
-      endMessage: chalk.green(`${depName} ✓`),
-      logTime: true,
-    });
+      if (!targetPackageJson[source]) {
+        targetPackageJson[source] = {
+          [targetDependency]: targetVersionResolved,
+        };
+      } else {
+        targetPackageJson[source][targetDependency] = targetVersionResolved;
+      }
 
-    totalInstalls++;
+      console.log(targetPackageJson);
+    } else {
+      const installCmd = (dependencyManager === "yarn"
+        ? ["yarn", "add", sourceParam, `${targetDependency}@${targetVersion}`]
+        : [
+            "npm",
+            "install",
+            sourceParam,
+            `${targetDependency}@${targetVersion}`,
+          ]
+      ).join(" ");
+
+      await runCommand(`cd ${packageDir} && ${installCmd}`, {
+        startMessage: `${chalk.white.bold(depName)}: ${installCmd}`,
+        endMessage: chalk.green(`${depName} ✓`),
+        logTime: true,
+      });
+
+      totalInstalls++;
+    }
   }
 
   if (totalInstalls === 0) process.exit();
