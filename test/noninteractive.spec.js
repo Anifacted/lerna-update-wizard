@@ -111,4 +111,33 @@ describe("Noninteractive mode", () => {
       );
     });
   });
+
+  describe("when updating existing scoped dependency", () => {
+    it("should install package", async () => {
+      const projectPath = await generateProject({
+        name: "project-noninteractive-updating-scoped-dependency",
+        packages: [
+          {
+            name: "sub-package",
+            dependencies: {
+              "@ngrx/entity": "6.1.0",
+            },
+          },
+        ],
+      });
+
+      await runProgram(projectPath, `Installed 1 packages in`, {
+        flags: "--non-interactive --dependency @ngrx/entity@7.0.0",
+      });
+
+      expect(
+        require(resolve(
+          projectPath,
+          "packages/sub-package/node_modules/@ngrx/entity/package.json"
+        )),
+        "to satisfy",
+        { version: "7.0.0" }
+      );
+    });
+  });
 });
