@@ -6,6 +6,7 @@ const orderBy = require("lodash/orderBy");
 const globby = require("globby");
 const semverCompare = require("semver-compare");
 const perf = require("execution-time")();
+const fs = require("fs");
 
 const runCommand = require("./utils/runCommand");
 const fileExists = require("./utils/fileExists");
@@ -420,17 +421,27 @@ module.exports = async ({ input, flags }) => {
     }[dependencyManager][source || "dependencies"];
 
     if (true) {
-      const targetPackageJson = require(resolve(packageDir, "package.json"));
+      const packageJsonPath = resolve(packageDir, "package.json");
+      const targetPackageJson = require(packageJsonPath);
 
-      if (!targetPackageJson[source]) {
-        targetPackageJson[source] = {
-          [targetDependency]: targetVersionResolved,
-        };
-      } else {
-        targetPackageJson[source][targetDependency] = targetVersionResolved;
-      }
+      targetPackageJson[source] = Object.keys({
+        ...(targetPackageJson[source] || {}),
+        [targetDependency]: targetVersionResolved,
+      })
+        .sort()
+        .reduce(
+          (prev, dep) => ({ ...prev, [dep]: targetPackageJson[source][dep] }),
+          {}
+        );
+
+      fs.writeFileSync(
+        packageJsonPath,
+        JSON.stringify(targetPackageJson, null, 2)
+      );
 
       console.log(targetPackageJson);
+
+      ui.log.write(chalk.green(`Wrote to: ${packageJsonPath} ✓`));
     } else {
       const installCmd = (dependencyManager === "yarn"
         ? ["yarn", "add", sourceParam, `${targetDependency}@${targetVersion}`]
