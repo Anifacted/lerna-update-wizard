@@ -421,12 +421,10 @@ module.exports = async ({ input, flags }) => {
     chalk.bold(`Installed ${totalInstalls} packages in ${perf.stop().words}`)
   );
 
+  await runCommand(`lerna link`);
   ui.log.write(
-    chalk.bold(`Re-linking Lerna packages...`)
+    chalk.bold(`Re-linked Lerna packages.`)
   );
-  await runCommand(`lerna link`, {
-    logTime: true,
-  });
 
   if (!flags.nonInteractive) {
     const userName = (
