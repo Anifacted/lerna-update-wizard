@@ -60,10 +60,13 @@ module.exports = async ({ input, flags }) => {
     ? flags.packages.split(",")
     : lernaConfig.packages || ["packages/*"];
 
-  const packagesRead = await globby(
-    defaultPackagesGlobs.map(glob => resolve(projectDir, glob, "package.json")),
-    { expandDirectories: true }
-  );
+  const packagesRead = [
+    projectPackageJsonPath, 
+    ...await globby(
+      defaultPackagesGlobs.map(glob => resolve(projectDir, glob, "package.json")),
+      { expandDirectories: true }
+    )
+  ]
 
   const packages = orderBy(
     packagesRead.map(path => ({
@@ -417,6 +420,13 @@ module.exports = async ({ input, flags }) => {
   ui.log.write(
     chalk.bold(`Installed ${totalInstalls} packages in ${perf.stop().words}`)
   );
+
+  ui.log.write(
+    chalk.bold(`Re-linking Lerna packages...`)
+  );
+  await runCommand(`lerna link`, {
+    logTime: true,
+  });
 
   if (!flags.nonInteractive) {
     const userName = (
