@@ -24,7 +24,34 @@ describe("lerna.json `packages` configuration", () => {
 
       await runProgram(
         projectPath,
-        "No packages found. Is this a Lerna project?"
+        "Error: No packages found. Please specify via:"
+      );
+    });
+  });
+
+  describe("but given a package.json `packages` configuration", () => {
+    it("uses the package.json `packages` configuration", async () => {
+      // eslint-disable-next-line
+      jest.setTimeout(100000);
+
+      const projectPath = await generateProject({
+        ...projectConfig,
+        workspaces: { packages: ["fooPackages/*"] },
+        packages: [
+          {
+            name: "sub-package-myPackages",
+            dependencies: { lodash: "0.1.0" },
+            moduleDirName: "fooPackages",
+          },
+        ],
+      });
+
+      await runProgram(
+        projectPath,
+        `? Select a dependency to upgrade: (Use arrow keys or type to search)
+         ❯ lodash (1 version)
+
+         >>> input CTRL+C`
       );
     });
   });

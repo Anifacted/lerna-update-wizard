@@ -40,12 +40,28 @@ module.exports = async ({ input, flags }) => {
     "No 'package.json' found in specified directory"
   );
 
-  const { name: projectName } = require(projectPackageJsonPath);
+  ui.logBottom("Resolving package locations...");
 
-  // Read `lerna.json` config file
-  let lernaConfig = {};
+  let packagesConfig = ["packages/*"];
+
+  const { name: projectName, workspaces } = require(projectPackageJsonPath);
+
+  // Attempt to get `packages` config from project package.json
+  if (workspaces && Array.isArray(workspaces.packages)) {
+    packagesConfig = workspaces.packages;
+    ui.logBottom(
+      "Found `packages` config in `package.json['workspaces']['packages']`"
+    );
+  }
+
+  // Attempt to get `packages` config from lerna.json
   try {
-    lernaConfig = require(resolve(projectDir, "lerna.json"));
+    const lernaConfig = require(resolve(projectDir, "lerna.json"));
+
+    if (Array.isArray(lernaConfig.packages)) {
+      packagesConfig = lernaConfig.packages;
+      ui.logBottom("Found `packages` config in `lerna.json['packages']`");
+    }
   } catch (e) {}
 
   ui.log.write(
@@ -58,7 +74,7 @@ module.exports = async ({ input, flags }) => {
 
   const defaultPackagesGlobs = flags.packages
     ? flags.packages.split(",")
-    : lernaConfig.packages || ["packages/*"];
+    : packagesConfig;
 
   const packagesRead = await globby(
     defaultPackagesGlobs.map(glob => resolve(projectDir, glob, "package.json")),
@@ -73,7 +89,14 @@ module.exports = async ({ input, flags }) => {
     "config.name"
   );
 
-  invariant(packages.length > 0, "No packages found. Is this a Lerna project?");
+  invariant(
+    packages.length > 0,
+    "No packages found. Please specify via:",
+    "",
+    "  package.json:  ['workspaces']['packages']",
+    "  lerna.json:    ['packages']",
+    "  --packages     (CLI flag. See --help)"
+  );
 
   ui.logBottom("");
 

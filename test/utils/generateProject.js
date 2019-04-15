@@ -5,7 +5,14 @@ const exec = util.promisify(require("child_process").exec);
 const chalk = require("chalk");
 
 const generateProject = async (options, log) => {
-  const { name, packages, dependencies, prefixPath, lernaJson } = options;
+  const {
+    name,
+    packages,
+    dependencies,
+    prefixPath,
+    lernaJson,
+    workspaces,
+  } = options;
 
   const p = path.resolve(prefixPath, name);
 
@@ -24,7 +31,8 @@ const generateProject = async (options, log) => {
         "test": "echo 'Error: no test specified' && exit 1"
       },
       "author": "",
-      "license": "ISC"
+      "license": "ISC",
+      "workspaces": ${workspaces ? JSON.stringify(workspaces) : "{}"}
     }`),
       null,
       2
