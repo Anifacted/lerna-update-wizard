@@ -3,4 +3,3 @@ node_modules/
 tmp/
 yarn-error.log
 tmp1/
-package.lock
