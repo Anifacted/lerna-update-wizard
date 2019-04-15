@@ -20,6 +20,8 @@ const { input, flags } = meow(
 
     --non-interactive     Prevent any interactive prompts (Requires --dependency flag to be specified)
 
+    --lazy                Runs a single install command after updating package.json files, instead installing inside each individual package (Useful for workspaces)
+
   Examples:
     $ lernaupdate ./myproject --dedupe
 
@@ -49,6 +51,9 @@ const { input, flags } = meow(
       },
       newIntallsMode: {
         type: "string",
+      },
+      lazy: {
+        type: "boolean",
       },
     },
   }
