@@ -57,7 +57,7 @@ module.exports = async ({ input, flags }) => {
     );
   }
 
-  if (workspaces && !flags.lazy) {
+  if (workspaces && !flags.lazy && !flags.nonInteractive) {
     ui.logBottom("");
 
     const { useLazy } = await inquirer.prompt([
