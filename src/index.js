@@ -16,7 +16,6 @@ const invariant = require("./utils/invariant");
 const parseDependency = require("./utils/parseDependency");
 const sanitizeGitBranchName = require("./utils/sanitizeGitBranchName");
 const modifyPackageJson = require("./utils/modifyPackageJson");
-const lines = require("./utils/lines");
 
 inquirer.registerPrompt(
   "autocomplete",
@@ -55,33 +54,6 @@ module.exports = async ({ input, flags }) => {
     ui.logBottom(
       "Found `packages` config in `package.json['workspaces']['packages']`"
     );
-  }
-
-  if (workspaces && !flags.lazy && !flags.nonInteractive) {
-    ui.logBottom("");
-
-    const { useLazy } = await inquirer.prompt([
-      {
-        name: "useLazy",
-        type: "list",
-        message: lines(
-          "It looks like you are using Yarn Workspaces!",
-          chalk.reset(
-            "  A single install at the end is recommended to save time."
-          ),
-          chalk.reset(
-            "  Note: You can enable this automatically using the --lazy flag"
-          ),
-          ""
-        ),
-        choices: [
-          { name: "Run single-install (lazy)", value: true },
-          { name: "Run individual installs (exhaustive)", value: false },
-        ],
-      },
-    ]);
-
-    flags.lazy = useLazy;
   }
 
   // Attempt to get `packages` config from lerna.json
