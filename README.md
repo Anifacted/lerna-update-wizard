@@ -106,6 +106,14 @@ Lerna Update Wizard will automatically detect the package manager used for each 
 
 ![Yarn install](/public/yarn.gif?raw=true "Yarn install")
 
+### Yarn Workspaces & lazy installation
+
+When using [Yarn Workspaces](https://yarnpkg.com/lang/en/docs/workspaces/) for your mono-repo, only a single installation is required in the top-level directory after changing a dependency in the package.json file for one or more sub-packages.
+
+To achieve this single "lazy" install, which can significantly speed up the install duration, you can specify the `--lazy` flag.
+
+If not specified, you will be prompted with the option to enable it at runtime, whenever use of Yarn Workspaces is detected (unless in non-interactive mode).
+
 ### Notes
 
 Lerna Update Wizard takes Lerna's `packages` config parameter into account if [specified in lerna.json](https://github.com/lerna/lerna#lernajson). This means that if you have your packages located in a directory other than `packages/`, this tool will still work, as long as their parent directory is specified.
