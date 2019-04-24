@@ -21,19 +21,19 @@ const generateProject = async (options, log) => {
   await fs.outputFile(
     path.resolve(p, "package.json"),
     JSON.stringify(
-      JSON.parse(`{
-      "name": "${name}",
-      "version": "1.0.0",
-      "dependencies": ${dependencies ? JSON.stringify(dependencies) : "{}"},
-      "description": "",
-      "main": "index.js",
-      "scripts": {
-        "test": "echo 'Error: no test specified' && exit 1"
+      {
+        name: name,
+        version: "1.0.0",
+        dependencies: dependencies || {},
+        description: "",
+        main: "index.js",
+        scripts: {
+          test: "echo 'Error: no test specified' && exit 1",
+        },
+        author: "",
+        license: "ISC",
+        workspaces: workspaces,
       },
-      "author": "",
-      "license": "ISC",
-      "workspaces": ${workspaces ? JSON.stringify(workspaces) : "{}"}
-    }`),
       null,
       2
     )
