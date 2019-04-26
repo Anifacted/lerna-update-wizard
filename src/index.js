@@ -143,11 +143,15 @@ module.exports = async ({ input, flags }) => {
     );
 
   const dependencies = packages.reduce(
-    (prev, { config: { dependencies, devDependencies, name } }) => ({
+    (
+      prev,
+      { config: { dependencies, devDependencies, peerDependencies, name } }
+    ) => ({
       ...prev,
       [name]: {
         ...setSourceForDeps(dependencies),
         ...setSourceForDeps(devDependencies, "devDependencies"),
+        ...setSourceForDeps(peerDependencies, "peerDependencies"),
       },
     }),
     {}
