@@ -6,6 +6,7 @@ const orderBy = require("lodash/orderBy");
 const globby = require("globby");
 const semverCompare = require("semver-compare");
 const perf = require("execution-time")();
+const fs = require("fs-extra");
 
 const runCommand = require("./utils/runCommand");
 const fileExists = require("./utils/fileExists");
@@ -14,6 +15,8 @@ const plural = require("./utils/plural");
 const invariant = require("./utils/invariant");
 const parseDependency = require("./utils/parseDependency");
 const sanitizeGitBranchName = require("./utils/sanitizeGitBranchName");
+const modifyPackageJson = require("./utils/modifyPackageJson");
+const lines = require("./utils/lines");
 
 inquirer.registerPrompt(
   "autocomplete",
@@ -40,12 +43,55 @@ module.exports = async ({ input, flags }) => {
     "No 'package.json' found in specified directory"
   );
 
-  const { name: projectName } = require(projectPackageJsonPath);
+  ui.logBottom("Resolving package locations...");
 
-  // Read `lerna.json` config file
-  let lernaConfig = {};
+  let packagesConfig = ["packages/*"];
+
+  const { name: projectName, workspaces } = require(projectPackageJsonPath);
+
+  // Attempt to get `packages` config from project package.json
+  if (workspaces && Array.isArray(workspaces.packages)) {
+    packagesConfig = workspaces.packages;
+    ui.logBottom(
+      "Found `packages` config in `package.json['workspaces']['packages']`"
+    );
+  }
+
+  if (workspaces && !flags.lazy && !flags.nonInteractive) {
+    ui.logBottom("");
+
+    const { useLazy } = await inquirer.prompt([
+      {
+        name: "useLazy",
+        type: "list",
+        message: lines(
+          "It looks like you are using Yarn Workspaces!",
+          chalk.reset(
+            "  A single install at the end is recommended to save time."
+          ),
+          chalk.reset(
+            "  Note: You can enable this automatically using the --lazy flag"
+          ),
+          ""
+        ),
+        choices: [
+          { name: "Run single-install (lazy)", value: true },
+          { name: "Run individual installs (exhaustive)", value: false },
+        ],
+      },
+    ]);
+
+    flags.lazy = useLazy;
+  }
+
+  // Attempt to get `packages` config from lerna.json
   try {
-    lernaConfig = require(resolve(projectDir, "lerna.json"));
+    const lernaConfig = require(resolve(projectDir, "lerna.json"));
+
+    if (Array.isArray(lernaConfig.packages)) {
+      packagesConfig = lernaConfig.packages;
+      ui.logBottom("Found `packages` config in `lerna.json['packages']`");
+    }
   } catch (e) {}
 
   ui.log.write(
@@ -58,7 +104,7 @@ module.exports = async ({ input, flags }) => {
 
   const defaultPackagesGlobs = flags.packages
     ? flags.packages.split(",")
-    : lernaConfig.packages || ["packages/*"];
+    : packagesConfig;
 
   const packagesRead = [
     projectPackageJsonPath, 
@@ -76,7 +122,14 @@ module.exports = async ({ input, flags }) => {
     "config.name"
   );
 
-  invariant(packages.length > 0, "No packages found. Is this a Lerna project?");
+  invariant(
+    packages.length > 0,
+    "No packages found. Please specify via:",
+    "",
+    "  package.json:  ['workspaces']['packages']",
+    "  lerna.json:    ['packages']",
+    "  --packages     (CLI flag. See --help)"
+  );
 
   ui.logBottom("");
 
@@ -333,21 +386,41 @@ module.exports = async ({ input, flags }) => {
 
     targetVersion = promptedTarget;
   }
+  let targetVersionResolved = targetVersion;
+
+  let targetVersionLookup = (await runCommand(
+    `npm info ${targetDependency}@${targetVersion} version`,
+    {
+      startMessage: `Resolving dependency version for "${targetDependency}@${targetVersion}"`,
+      logOutput: false,
+    }
+  )).trim();
+
+  invariant(
+    targetVersionLookup,
+    `The version "${targetVersion}" was not found for "${targetDependency}"`
+  );
+
+  // If targeting a specific tag (such as @latest),
+  const versionFromDistTag = npmPackageInfo["dist-tags"][targetVersion];
+  if (versionFromDistTag) {
+    targetVersionResolved = `^${versionFromDistTag}`;
+  }
+
+  ui.log.write(chalk.green(`Using version ${targetVersionResolved} ✓\n`));
 
   perf.start();
   let totalInstalls = 0;
+
+  const dependencyManager = (await fileExists(resolve(projectDir, "yarn.lock")))
+    ? "yarn"
+    : "npm";
 
   // Install process
   for (let depName of targetPackages) {
     const existingDependency = dependencyMap[targetDependency];
 
     let source = "dependencies";
-
-    const dependencyManager = (await fileExists(
-      resolve(projectDir, "yarn.lock")
-    ))
-      ? "yarn"
-      : "npm";
 
     if (existingDependency && existingDependency.packs[depName]) {
       const { version, source: theSource } =
@@ -386,9 +459,10 @@ module.exports = async ({ input, flags }) => {
       }[flags.newInstallsMode];
     }
 
-    const { path: packageDir } = packages.find(
-      ({ config: { name } }) => name === depName
-    );
+    const {
+      path: packageDir,
+      config: { name: packageName },
+    } = packages.find(({ config: { name } }) => name === depName);
 
     const sourceParam = {
       yarn: {
@@ -401,18 +475,50 @@ module.exports = async ({ input, flags }) => {
       },
     }[dependencyManager][source || "dependencies"];
 
-    const installCmd = (dependencyManager === "yarn"
-      ? ["yarn", "add", sourceParam, `${targetDependency}@${targetVersion}`]
-      : ["npm", "install", sourceParam, `${targetDependency}@${targetVersion}`]
-    ).join(" ");
+    if (flags.lazy) {
+      const packageJsonPath = resolve(packageDir, "package.json");
+      const targetPackageJson = require(packageJsonPath);
 
-    await runCommand(`cd ${packageDir} && ${installCmd}`, {
-      startMessage: `${chalk.white.bold(depName)}: ${installCmd}`,
-      endMessage: chalk.green(`${depName} ✓`),
+      fs.writeFileSync(
+        packageJsonPath,
+        modifyPackageJson(targetPackageJson, {
+          [source]: { [targetDependency]: targetVersionResolved },
+        })
+      );
+
+      ui.log.write(
+        chalk`{white.bold ${packageName}}: {green package.json updated ✓}\n`
+      );
+    } else {
+      const installCmd = (dependencyManager === "yarn"
+        ? ["yarn", "add", sourceParam, `${targetDependency}@${targetVersion}`]
+        : [
+            "npm",
+            "install",
+            sourceParam,
+            `${targetDependency}@${targetVersion}`,
+          ]
+      ).join(" ");
+
+      await runCommand(`cd ${packageDir} && ${installCmd}`, {
+        startMessage: `${chalk.white.bold(depName)}: ${installCmd}`,
+        endMessage: chalk.green(`${depName} ✓`),
+        logTime: true,
+      });
+    }
+    totalInstalls++;
+  }
+
+  if (flags.lazy) {
+    ui.log.write("");
+
+    const installCmd = dependencyManager === "yarn" ? "yarn" : "npm install";
+
+    await runCommand(`cd ${projectDir} && ${installCmd}`, {
+      startMessage: `${chalk.white.bold(projectName)}: ${installCmd}`,
+      endMessage: chalk.green(`Packages installed ✓`),
       logTime: true,
     });
-
-    totalInstalls++;
   }
 
   if (totalInstalls === 0) process.exit();

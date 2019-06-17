@@ -5,7 +5,14 @@ const exec = util.promisify(require("child_process").exec);
 const chalk = require("chalk");
 
 const generateProject = async (options, log) => {
-  const { name, packages, dependencies, prefixPath, lernaJson } = options;
+  const {
+    name,
+    packages,
+    dependencies,
+    prefixPath,
+    lernaJson,
+    workspaces,
+  } = options;
 
   const p = path.resolve(prefixPath, name);
 
@@ -14,18 +21,19 @@ const generateProject = async (options, log) => {
   await fs.outputFile(
     path.resolve(p, "package.json"),
     JSON.stringify(
-      JSON.parse(`{
-      "name": "${name}",
-      "version": "1.0.0",
-      "dependencies": ${dependencies ? JSON.stringify(dependencies) : "{}"},
-      "description": "",
-      "main": "index.js",
-      "scripts": {
-        "test": "echo 'Error: no test specified' && exit 1"
+      {
+        name: name,
+        version: "1.0.0",
+        dependencies: dependencies || {},
+        description: "",
+        main: "index.js",
+        scripts: {
+          test: "echo 'Error: no test specified' && exit 1",
+        },
+        author: "",
+        license: "ISC",
+        workspaces: workspaces,
       },
-      "author": "",
-      "license": "ISC"
-    }`),
       null,
       2
     )
