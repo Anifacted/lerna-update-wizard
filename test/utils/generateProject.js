@@ -9,6 +9,8 @@ const generateProject = async (options, log) => {
     name,
     packages,
     dependencies,
+    devDependencies,
+    peerDependencies,
     prefixPath,
     lernaJson,
     workspaces,
@@ -25,6 +27,8 @@ const generateProject = async (options, log) => {
         name: name,
         version: "1.0.0",
         dependencies: dependencies || {},
+        devDependencies: devDependencies || {},
+        peerDependencies: peerDependencies || {},
         description: "",
         main: "index.js",
         scripts: {
@@ -46,7 +50,7 @@ const generateProject = async (options, log) => {
     );
   }
 
-  if (typeof dependencies === "object") {
+  if ([dependencies, devDependencies].some(d => typeof d === "object")) {
     await exec(`cd ${p} && npm install`);
   }
 

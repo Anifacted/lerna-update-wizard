@@ -446,7 +446,7 @@ module.exports = async ({ input, flags }) => {
           choices: [
             { name: "dependencies" },
             { name: "devDependencies" },
-            dependencyManager === "yarn" && { name: "peerDependencies" },
+            { name: "peerDependencies" },
           ].filter(Boolean),
         },
       ]);
@@ -476,7 +476,12 @@ module.exports = async ({ input, flags }) => {
       },
     }[dependencyManager][source || "dependencies"];
 
-    if (flags.lazy) {
+    if (
+      // If we're running in lazy mode
+      flags.lazy ||
+      // Or if we're dealing with a peer dependency via npm
+      (source === "peerDependencies" && dependencyManager === "npm")
+    ) {
       const packageJsonPath = resolve(packageDir, "package.json");
       const targetPackageJson = require(packageJsonPath);
 
@@ -510,6 +515,7 @@ module.exports = async ({ input, flags }) => {
     totalInstalls++;
   }
 
+  // Final install lazy install after package.json files have been modified
   if (flags.lazy) {
     ui.log.write("");
 

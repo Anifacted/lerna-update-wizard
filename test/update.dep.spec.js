@@ -136,8 +136,9 @@ describe("Update dependency", async () => {
 
         ❯ dependencies
           devDependencies
+          peerDependencies
 
-        >>> input ARROW_UP
+        >>> input ARROW_DOWN
 
         ❯ devDependencies
 
