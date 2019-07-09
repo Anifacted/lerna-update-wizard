@@ -57,33 +57,6 @@ module.exports = async ({ input, flags }) => {
     );
   }
 
-  if (workspaces && !flags.lazy && !flags.nonInteractive) {
-    ui.logBottom("");
-
-    const { useLazy } = await inquirer.prompt([
-      {
-        name: "useLazy",
-        type: "list",
-        message: lines(
-          "It looks like you are using Yarn Workspaces!",
-          chalk.reset(
-            "  A single install at the end is recommended to save time."
-          ),
-          chalk.reset(
-            "  Note: You can enable this automatically using the --lazy flag"
-          ),
-          ""
-        ),
-        choices: [
-          { name: "Run single-install (lazy)", value: true },
-          { name: "Run individual installs (exhaustive)", value: false },
-        ],
-      },
-    ]);
-
-    flags.lazy = useLazy;
-  }
-
   // Attempt to get `packages` config from lerna.json
   try {
     const lernaConfig = require(resolve(projectDir, "lerna.json"));
@@ -409,6 +382,34 @@ module.exports = async ({ input, flags }) => {
   }
 
   ui.log.write(chalk.green(`Using version ${targetVersionResolved} ✓\n`));
+
+  // PROMPT: Yarn workspaces lazy installation prompt
+  if (workspaces && !flags.lazy && !flags.nonInteractive) {
+    ui.logBottom("");
+
+    const { useLazy } = await inquirer.prompt([
+      {
+        name: "useLazy",
+        type: "list",
+        message: lines(
+          "It looks like you are using Yarn Workspaces!",
+          chalk.reset(
+            "  A single install at the end is recommended to save time."
+          ),
+          chalk.reset(
+            "  Note: You can enable this automatically using the --lazy flag"
+          ),
+          ""
+        ),
+        choices: [
+          { name: "Run single-install (lazy)", value: true },
+          { name: "Run individual installs (exhaustive)", value: false },
+        ],
+      },
+    ]);
+
+    flags.lazy = useLazy;
+  }
 
   perf.start();
   let totalInstalls = 0;
