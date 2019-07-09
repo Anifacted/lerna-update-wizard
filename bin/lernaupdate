@@ -22,6 +22,8 @@ const { input, flags } = meow(
 
     --lazy                Runs a single install command after updating package.json files, instead installing inside each individual package (Useful for workspaces)
 
+    --install-args        Any additional arguments to pass to the NPM or Yarn during the installation (space-separated). See example.
+
   Examples:
     $ lernaupdate ./myproject --dedupe
 
@@ -33,6 +35,8 @@ const { input, flags } = meow(
     $ lernaupdate ./myproject --packages "packages/*"
 
     $ lernaupdate ./myproject --non-interactive --dependency "react@latest" --new-installs-mode dev
+
+    $ lernaupdate ./myproject --install-args="--verbose --prefer-offline"
 `,
   {
     flags: {
@@ -54,6 +58,9 @@ const { input, flags } = meow(
       },
       lazy: {
         type: "boolean",
+      },
+      installArgs: {
+        type: "string",
       },
     },
   }

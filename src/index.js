@@ -17,6 +17,7 @@ const parseDependency = require("./utils/parseDependency");
 const sanitizeGitBranchName = require("./utils/sanitizeGitBranchName");
 const modifyPackageJson = require("./utils/modifyPackageJson");
 const lines = require("./utils/lines");
+const composeCommand = require("./utils/composeCommand");
 
 inquirer.registerPrompt(
   "autocomplete",
@@ -383,7 +384,7 @@ module.exports = async ({ input, flags }) => {
 
   ui.log.write(chalk.green(`Using version ${targetVersionResolved} ✓\n`));
 
-  // PROMPT: Yarn workspaces lazy installation prompt
+  // PROMPT: Yarn workspaces lazy installation
   if (workspaces && !flags.lazy && !flags.nonInteractive) {
     ui.logBottom("");
 
@@ -497,15 +498,22 @@ module.exports = async ({ input, flags }) => {
         chalk`{white.bold ${packageName}}: {green package.json updated ✓}\n`
       );
     } else {
-      const installCmd = (dependencyManager === "yarn"
-        ? ["yarn", "add", sourceParam, `${targetDependency}@${targetVersion}`]
-        : [
-            "npm",
-            "install",
-            sourceParam,
-            `${targetDependency}@${targetVersion}`,
-          ]
-      ).join(" ");
+      const installCmd =
+        dependencyManager === "yarn"
+          ? composeCommand(
+              "yarn",
+              "add",
+              sourceParam,
+              flags.installArgs,
+              `${targetDependency}@${targetVersion}`
+            )
+          : composeCommand(
+              "npm",
+              "install",
+              sourceParam,
+              flags.installArgs,
+              `${targetDependency}@${targetVersion}`
+            );
 
       await runCommand(`cd ${packageDir} && ${installCmd}`, {
         startMessage: `${chalk.white.bold(depName)}: ${installCmd}`,
@@ -520,7 +528,10 @@ module.exports = async ({ input, flags }) => {
   if (flags.lazy) {
     ui.log.write("");
 
-    const installCmd = dependencyManager === "yarn" ? "yarn" : "npm install";
+    const installCmd = composeCommand(
+      dependencyManager === "yarn" ? "yarn" : "npm install",
+      flags.installArgs
+    );
 
     await runCommand(`cd ${projectDir} && ${installCmd}`, {
       startMessage: `${chalk.white.bold(projectName)}: ${installCmd}`,
