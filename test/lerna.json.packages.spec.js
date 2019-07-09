@@ -48,7 +48,20 @@ describe("lerna.json `packages` configuration", () => {
 
       await runProgram(
         projectPath,
-        `? It looks like you are using Yarn Workspaces!
+        `
+        ❯ lodash (1 version)
+
+        >>> input ENTER
+
+        ❯◉ sub-package-myPackages (0.1.0)
+
+        >>> input ENTER
+
+        ? Select version to install:
+
+        >>> input ENTER
+
+        ? It looks like you are using Yarn Workspaces!
          A single install at the end is recommended to save time.
          Note: You can enable this automatically using the --lazy flag
         (Use arrow keys)
@@ -56,9 +69,6 @@ describe("lerna.json `packages` configuration", () => {
          Run individual installs (exhaustive)
 
          >>> input ENTER
-
-         ? Select a dependency to upgrade: (Use arrow keys or type to search)
-         ❯ lodash (1 version)
 
          >>> input CTRL+C`
       );
