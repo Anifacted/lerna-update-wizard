@@ -17,6 +17,7 @@ const parseDependency = require("./utils/parseDependency");
 const sanitizeGitBranchName = require("./utils/sanitizeGitBranchName");
 const modifyPackageJson = require("./utils/modifyPackageJson");
 const lines = require("./utils/lines");
+const composeCommand = require("./utils/composeCommand");
 
 inquirer.registerPrompt(
   "autocomplete",
@@ -55,33 +56,6 @@ module.exports = async ({ input, flags }) => {
     ui.logBottom(
       "Found `packages` config in `package.json['workspaces']['packages']`"
     );
-  }
-
-  if (workspaces && !flags.lazy && !flags.nonInteractive) {
-    ui.logBottom("");
-
-    const { useLazy } = await inquirer.prompt([
-      {
-        name: "useLazy",
-        type: "list",
-        message: lines(
-          "It looks like you are using Yarn Workspaces!",
-          chalk.reset(
-            "  A single install at the end is recommended to save time."
-          ),
-          chalk.reset(
-            "  Note: You can enable this automatically using the --lazy flag"
-          ),
-          ""
-        ),
-        choices: [
-          { name: "Run single-install (lazy)", value: true },
-          { name: "Run individual installs (exhaustive)", value: false },
-        ],
-      },
-    ]);
-
-    flags.lazy = useLazy;
   }
 
   // Attempt to get `packages` config from lerna.json
@@ -146,11 +120,15 @@ module.exports = async ({ input, flags }) => {
     );
 
   const dependencies = packages.reduce(
-    (prev, { config: { dependencies, devDependencies, name } }) => ({
+    (
+      prev,
+      { config: { dependencies, devDependencies, peerDependencies, name } }
+    ) => ({
       ...prev,
       [name]: {
         ...setSourceForDeps(dependencies),
         ...setSourceForDeps(devDependencies, "devDependencies"),
+        ...setSourceForDeps(peerDependencies, "peerDependencies"),
       },
     }),
     {}
@@ -409,6 +387,34 @@ module.exports = async ({ input, flags }) => {
 
   ui.log.write(chalk.green(`Using version ${targetVersionResolved} ✓\n`));
 
+  // PROMPT: Yarn workspaces lazy installation
+  if (workspaces && !flags.lazy && !flags.nonInteractive) {
+    ui.logBottom("");
+
+    const { useLazy } = await inquirer.prompt([
+      {
+        name: "useLazy",
+        type: "list",
+        message: lines(
+          "It looks like you are using Yarn Workspaces!",
+          chalk.reset(
+            "  A single install at the end is recommended to save time."
+          ),
+          chalk.reset(
+            "  Note: You can enable this automatically using the --lazy flag"
+          ),
+          ""
+        ),
+        choices: [
+          { name: "Run single-install (lazy)", value: true },
+          { name: "Run individual installs (exhaustive)", value: false },
+        ],
+      },
+    ]);
+
+    flags.lazy = useLazy;
+  }
+
   perf.start();
   let totalInstalls = 0;
 
@@ -445,7 +451,7 @@ module.exports = async ({ input, flags }) => {
           choices: [
             { name: "dependencies" },
             { name: "devDependencies" },
-            dependencyManager === "yarn" && { name: "peerDependencies" },
+            { name: "peerDependencies" },
           ].filter(Boolean),
         },
       ]);
@@ -475,7 +481,12 @@ module.exports = async ({ input, flags }) => {
       },
     }[dependencyManager][source || "dependencies"];
 
-    if (flags.lazy) {
+    if (
+      // If we're running in lazy mode
+      flags.lazy ||
+      // Or if we're dealing with a peer dependency via npm
+      (source === "peerDependencies" && dependencyManager === "npm")
+    ) {
       const packageJsonPath = resolve(packageDir, "package.json");
       const targetPackageJson = require(packageJsonPath);
 
@@ -490,15 +501,22 @@ module.exports = async ({ input, flags }) => {
         chalk`{white.bold ${packageName}}: {green package.json updated ✓}\n`
       );
     } else {
-      const installCmd = (dependencyManager === "yarn"
-        ? ["yarn", "add", sourceParam, `${targetDependency}@${targetVersion}`]
-        : [
-            "npm",
-            "install",
-            sourceParam,
-            `${targetDependency}@${targetVersion}`,
-          ]
-      ).join(" ");
+      const installCmd =
+        dependencyManager === "yarn"
+          ? composeCommand(
+              "yarn",
+              "add",
+              sourceParam,
+              flags.installArgs,
+              `${targetDependency}@${targetVersion}`
+            )
+          : composeCommand(
+              "npm",
+              "install",
+              sourceParam,
+              flags.installArgs,
+              `${targetDependency}@${targetVersion}`
+            );
 
       await runCommand(`cd ${packageDir} && ${installCmd}`, {
         startMessage: `${chalk.white.bold(depName)}: ${installCmd}`,
@@ -509,10 +527,14 @@ module.exports = async ({ input, flags }) => {
     totalInstalls++;
   }
 
+  // Final install lazy install after package.json files have been modified
   if (flags.lazy) {
     ui.log.write("");
 
-    const installCmd = dependencyManager === "yarn" ? "yarn" : "npm install";
+    const installCmd = composeCommand(
+      dependencyManager === "yarn" ? "yarn" : "npm install",
+      flags.installArgs
+    );
 
     await runCommand(`cd ${projectDir} && ${installCmd}`, {
       startMessage: `${chalk.white.bold(projectName)}: ${installCmd}`,
