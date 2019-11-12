@@ -11,6 +11,7 @@ const fileExists = require("./utils/fileExists");
 const ui = require("./utils/ui");
 const invariant = require("./utils/invariant");
 const sanitizeGitBranchName = require("./utils/sanitizeGitBranchName");
+const generateGitCommitMessage = require("./generateGitCommitMessage");
 const lines = require("./utils/lines");
 const composeCommand = require("./utils/composeCommand");
 
@@ -285,7 +286,9 @@ module.exports = async ({ input, flags }) => {
         message: "Enter a name for your branch:",
         when: ({ shouldCreateGitBranch }) => shouldCreateGitBranch,
         default: sanitizeGitBranchName(
-          `${userName}/${targetDependency}-${targetVersion}`
+          jobs.length === 1
+            ? `${userName}/${jobs[0].targetDependency}-${jobs[0].targetVersionResolved}`
+            : `${userName}/upgrade-dependencies`
         ),
       },
       {
@@ -298,7 +301,10 @@ module.exports = async ({ input, flags }) => {
         name: "gitCommitMessage",
         message: "Enter a git commit message:",
         when: ({ shouldCreateGitCommit }) => shouldCreateGitCommit,
-        default: `Upgrade dependency: ${targetDependency}@${targetVersion}`,
+        default:
+          jobs.length === 1
+            ? `Update dependency: ${jobs[0].targetDependency}@${jobs[0].targetVersionResolved}`
+            : `Update ${jobs.length} dependencies`,
       },
     ]);
 
@@ -311,19 +317,7 @@ module.exports = async ({ input, flags }) => {
     }
 
     if (shouldCreateGitCommit) {
-      const subMessage = targetPackages
-        .reduce((prev, depName) => {
-          const fromVersion =
-            !isNewDependency &&
-            dependencyMap[targetDependency].packs[depName].version;
-
-          if (fromVersion === targetVersion) return prev;
-
-          return fromVersion
-            ? [...prev, `* ${depName}: ${fromVersion} →  ${targetVersion}`]
-            : [...prev, `* ${depName}: ${targetVersion}`];
-        }, [])
-        .join("\n");
+      const subMessage = generateGitCommitMessage(context, jobs);
 
       const createCmd = `git add . && git commit -m '${gitCommitMessage}' -m '${subMessage}'`;
       await runCommand(`cd ${projectDir} && ${createCmd}`, {
