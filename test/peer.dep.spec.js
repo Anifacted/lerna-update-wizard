@@ -43,6 +43,10 @@ describe("Peer dependency", async () => {
 
           >>> input ENTER
 
+          ? Confirm or edit installations
+
+          >>> input ENTER
+
           ❯ dependencies
             devDependencies
             peerDependencies
@@ -51,8 +55,8 @@ describe("Peer dependency", async () => {
           >>> input ARROW_DOWN
           >>> input ENTER
 
-          sub-package-a: package.json updated ✓
-          sub-package-b: package.json updated ✓
+          package.json updated
+          sub-package-a ✓
 
           >>> input CTRL+C
         `

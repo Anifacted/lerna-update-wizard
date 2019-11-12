@@ -47,8 +47,9 @@ const runJob = async (job, context) => {
           name: "targetSource",
           message: lines(
             `Select installation type for new dependency`,
-            chalk`\n  {reset ${targetPackageName}}`,
-            chalk`{reset.green.bold +} {reset.bold ${targetDependency} ${targetVersionResolved}}`,
+            "",
+            chalk`  {reset ${targetPackageName}}`,
+            chalk`  {reset.green + ${targetDependency} ${targetVersionResolved}}`,
             ""
           ),
           pageSize: 3,

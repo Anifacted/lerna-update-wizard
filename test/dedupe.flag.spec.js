@@ -69,6 +69,10 @@ describe("--dedupe flag", () => {
         >>> input ARROW_DOWN
         >>> input ENTER
 
+        ❯ ✓ Confirm
+
+        >>> input ENTER
+        
         Already installed (0.2.0)
 
         >>> input CTRL+C

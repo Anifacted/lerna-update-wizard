@@ -90,6 +90,10 @@ describe("Setting semver prefix for dependency", async () => {
 
         >>> input ENTER
 
+        ? Confirm or edit installations
+
+        >>> input ENTER
+
         ? Do you want to create a new git branch for the change? (Y/n)
 
         >>> input CTRL+C

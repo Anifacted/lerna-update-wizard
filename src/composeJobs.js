@@ -245,7 +245,7 @@ const composeJobs = async context => {
     await create();
   } else {
     const selectedJobs = jobs.map((job, index) => ({
-      name: chalk`{red [x]} ${job.targetDependency} {bold ${
+      name: chalk`{red x} ${job.targetDependency} {bold ${
         job.targetVersionResolved
       }} {grey (${plural("package", "packages", job.targetPackages.length)})}`,
       value: index,
@@ -255,20 +255,23 @@ const composeJobs = async context => {
       {
         name: "jobManager",
         type: "list",
-        message: lines("Confirm/Cancel installations", ""),
+        message: lines("Confirm or edit installations", ""),
         default: "confirm",
         choices: [
           ...selectedJobs,
           selectedJobs.length > 1 && {
-            name: chalk`{red [x]} {bold Clear all}`,
+            name: chalk`{red x} {bold Clear all}`,
             value: "reset",
           },
           new inquirer.Separator(),
           {
-            name: chalk`{green [+]} Add another...`,
+            name: chalk`{green +} Add another`,
             value: "create",
           },
-          { name: chalk`{green.bold [✓]} {bold Confirm}`, value: "confirm" },
+          {
+            name: chalk`{green.bold ✓} {bold Confirm}`,
+            value: "confirm",
+          },
         ].filter(Boolean),
       },
     ]);

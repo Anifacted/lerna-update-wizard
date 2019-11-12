@@ -65,6 +65,10 @@ describe("Update dependency", async () => {
 
         >>> input ENTER
 
+        ? Confirm or edit installations
+
+        >>> input ENTER
+
         ? Do you want to create a new git branch for the change? (Y/n)
 
         >>> input n
@@ -131,6 +135,10 @@ describe("Update dependency", async () => {
         >>> input ARROW_UP
 
         ❯ 0.2.2
+
+        >>> input ENTER
+
+        ? Confirm or edit installations
 
         >>> input ENTER
 
