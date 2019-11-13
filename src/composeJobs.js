@@ -8,7 +8,7 @@ const inquirer = require("inquirer");
 const runCommand = require("./utils/runCommand");
 const lines = require("./utils/lines");
 
-const createJob = async ({
+const createJobWizard = async ({
   flags,
   projectName,
   dependencyMap,
@@ -230,20 +230,24 @@ const createJob = async ({
 
 let jobs = [];
 
-const composeJobs = async context => {
+const composeJobsWizard = async context => {
   const create = async () => {
     try {
-      jobs = [...jobs, await createJob(context)];
+      jobs = [...jobs, await createJobWizard(context)];
+      await composeJobsWizard(context);
     } catch (e) {
-      console.info(chalk`{red ${e}}`);
-    } finally {
-      await composeJobs(context);
+      if (context.flags.nonInteractive) {
+        throw e;
+      } else {
+        console.info(chalk`{red ${e}}`);
+        await composeJobsWizard(context);
+      }
     }
   };
 
   if (!jobs.length) {
     await create();
-  } else {
+  } else if (!context.flags.nonInteractive) {
     const selectedJobs = jobs.map((job, index) => ({
       name: chalk`{red x} ${job.targetDependency} {bold ${
         job.targetVersionResolved
@@ -280,14 +284,14 @@ const composeJobs = async context => {
       await create();
     } else if (jobManager === "reset") {
       jobs = [];
-      await composeJobs(context);
+      await composeJobsWizard(context);
     } else if (jobManager !== "confirm") {
       jobs.splice(jobManager, 1);
-      await composeJobs(context);
+      await composeJobsWizard(context);
     }
   }
 
   return jobs;
 };
 
-module.exports = composeJobs;
+module.exports = composeJobsWizard;
