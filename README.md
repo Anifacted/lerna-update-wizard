@@ -1,6 +1,6 @@
 # Lerna Update Wizard
 
-Command line interface for simplifying the process of bulk updating dependencies across multiple Lerna packages.
+Command line interface for simplifying the process of bulk updating dependencies across multiple Lerna or Yarn Workspace packages.
 
 ## Install
 
@@ -60,6 +60,14 @@ $ lernaupdate ~/projects/my-lerna-project
 3. Complete the flow like normal (described above)
 
 ![Deduplicate packages](/public/dedupe.gif?raw=true "Deduplicate dependency")
+
+### Add/Update multiple dependencies in one session
+
+You can **batch** updates for multiple dependencies into one session. Choose the `+ Add another` after you've specified the details for the first update task.
+
+![Add packages](/public/multiple-jobs.png?raw=true "Confirm installation")
+
+**Note: Currently not supported in `--noninteractive` mode.**
 
 ### Auto-generate Git branch & commit
 

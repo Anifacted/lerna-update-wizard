@@ -4,20 +4,19 @@ const chalk = require("chalk");
 const uniq = require("lodash/uniq");
 const orderBy = require("lodash/orderBy");
 const globby = require("globby");
-const semverCompare = require("semver-compare");
 const perf = require("execution-time")();
-const fs = require("fs-extra");
 
 const runCommand = require("./utils/runCommand");
 const fileExists = require("./utils/fileExists");
 const ui = require("./utils/ui");
-const plural = require("./utils/plural");
 const invariant = require("./utils/invariant");
-const parseDependency = require("./utils/parseDependency");
 const sanitizeGitBranchName = require("./utils/sanitizeGitBranchName");
-const modifyPackageJson = require("./utils/modifyPackageJson");
+const generateGitCommitMessage = require("./generateGitCommitMessage");
 const lines = require("./utils/lines");
 const composeCommand = require("./utils/composeCommand");
+
+const composeJobs = require("./composeJobs");
+const runJob = require("./runJob");
 
 inquirer.registerPrompt(
   "autocomplete",
@@ -178,211 +177,17 @@ module.exports = async ({ input, flags }) => {
 
   const allDependencies = Object.keys(dependencyMap);
 
-  ui.log.write(`Starting update wizard for ${chalk.white.bold(projectName)}`);
-  ui.log.write("");
+  // INFO GATHER COMPLETE
 
-  let targetDependency =
-    flags.dependency && parseDependency(flags.dependency).name;
+  const context = {
+    flags,
+    projectName,
+    dependencyMap,
+    allDependencies,
+    packages,
+  };
 
-  if (!targetDependency) {
-    const { targetDependency: promptedTarget } = await inquirer.prompt([
-      {
-        type: "autocomplete",
-        name: "targetDependency",
-        message: "Select a dependency to upgrade:",
-        pageSize: 15,
-        source: (_ignore_, input) => {
-          const itemize = value => ({
-            value,
-            name: `${chalk.white(value)} ${chalk[dependencyMap[value].color](
-              `(${plural(
-                "version",
-                "versions",
-                dependencyMap[value].versions.length
-              )})`
-            )}`,
-          });
-
-          const sorter = flags.dedupe
-            ? (a, b) =>
-                dependencyMap[b].versions.length -
-                dependencyMap[a].versions.length
-            : undefined;
-
-          let results = input
-            ? allDependencies
-                .filter(name => new RegExp(input).test(name))
-                .sort(sorter)
-                .map(itemize)
-            : allDependencies.sort(sorter).map(itemize);
-
-          if (input && !allDependencies.includes(input)) {
-            results = [
-              ...results,
-              {
-                name: `${input} ${chalk.green.bold("[+ADD]")}`,
-                value: input,
-              },
-            ];
-          }
-
-          return Promise.resolve(results);
-        },
-      },
-    ]);
-
-    targetDependency = promptedTarget;
-  }
-
-  // Look up NPM dependency and its versions
-
-  const npmPackageInfoRaw = await runCommand(
-    `npm info ${targetDependency} versions dist-tags --json`,
-    {
-      startMessage: `Fetching package information for "${targetDependency}"`,
-      logOutput: false,
-    }
-  );
-
-  const npmPackageInfo = JSON.parse(npmPackageInfoRaw);
-
-  if (npmPackageInfo.error) {
-    throw new Error(`Could not look up "${targetDependency}" in NPM registry`);
-  }
-
-  // Target packages selection
-  const isNewDependency = !allDependencies.includes(targetDependency);
-
-  if (flags.nonInteractive && isNewDependency) {
-    invariant(
-      flags.newInstallsMode,
-      `"${targetDependency}" is a first-time install for one or more packages.`,
-      "In non-interactive mode you must specify the --new-installs-mode flag (prod|dev|peer) in this situation."
-    );
-  }
-
-  let targetPackages;
-
-  if (flags.nonInteractive && !flags.packages) {
-    const installedPackages = packages
-      .filter(
-        ({ config: { name } }) =>
-          !!(
-            dependencyMap[targetDependency] &&
-            dependencyMap[targetDependency].packs[name]
-          )
-      )
-      .map(({ config: { name } }) => name);
-
-    invariant(
-      installedPackages.length > 0,
-      `No packages contain the dependency "${targetDependency}".`,
-      "In non-interactive mode you must specify the --packages flag in this situation,",
-      "so the script can know which packages install it in."
-    );
-
-    targetPackages = installedPackages;
-  } else if (flags.packages) {
-    targetPackages = packages.map(({ config: { name } }) => name);
-  }
-
-  if (!targetPackages) {
-    const { targetPackages: promptedTarget } = await inquirer.prompt([
-      {
-        type: "checkbox",
-        name: "targetPackages",
-        message: "Select packages to affect:",
-        pageSize: 15,
-        choices: packages.map(({ config: { name: packageName } }) => {
-          if (isNewDependency) {
-            return {
-              name: packageName,
-              value: packageName,
-              checked: false,
-            };
-          }
-
-          const { version, source } =
-            dependencyMap[targetDependency].packs[packageName] || {};
-
-          const versionBit = version ? ` (${version})` : "";
-          const sourceBit =
-            source === "devDependencies" ? chalk.white(" (dev)") : "";
-
-          return {
-            name: `${packageName}${versionBit}${sourceBit}`,
-            value: packageName,
-            checked: !!version,
-          };
-        }),
-      },
-    ]);
-
-    targetPackages = promptedTarget;
-  }
-
-  // Target version selection
-  let targetVersion =
-    flags.dependency && parseDependency(flags.dependency).version;
-
-  if (!targetVersion) {
-    const npmVersions = npmPackageInfo.versions.reverse();
-    const npmDistTags = npmPackageInfo["dist-tags"];
-
-    const highestInstalled =
-      !isNewDependency &&
-      dependencyMap[targetDependency].versions.sort(semverCompare).pop();
-
-    const availableVersions = [
-      ...Object.entries(npmDistTags).map(([tag, version]) => ({
-        name: `${version} ${chalk.bold(`#${tag}`)}`,
-        value: version,
-      })),
-      !isNewDependency && {
-        name: `${highestInstalled} ${chalk.bold("Highest installed")}`,
-        value: highestInstalled,
-      },
-      ...npmVersions.filter(
-        version =>
-          version !== highestInstalled &&
-          !Object.values(npmDistTags).includes(version)
-      ),
-    ].filter(Boolean);
-
-    const { targetVersion: promptedTarget } = await inquirer.prompt([
-      {
-        type: "semverList",
-        name: "targetVersion",
-        message: "Select version to install:",
-        pageSize: 10,
-        choices: availableVersions,
-      },
-    ]);
-
-    targetVersion = promptedTarget;
-  }
-  let targetVersionResolved = targetVersion;
-
-  let targetVersionLookup = (await runCommand(
-    `npm info ${targetDependency}@${targetVersion} version`,
-    {
-      startMessage: `Resolving dependency version for "${targetDependency}@${targetVersion}"`,
-      logOutput: false,
-    }
-  )).trim();
-
-  invariant(
-    targetVersionLookup,
-    `The version "${targetVersion}" was not found for "${targetDependency}"`
-  );
-
-  // If targeting a specific tag (such as @latest),
-  const versionFromDistTag = npmPackageInfo["dist-tags"][targetVersion];
-  if (versionFromDistTag) {
-    targetVersionResolved = `^${versionFromDistTag}`;
-  }
-
-  ui.log.write(chalk.green(`Using version ${targetVersionResolved} ✓\n`));
+  const jobs = await composeJobs(context);
 
   // PROMPT: Yarn workspaces lazy installation
   if (workspaces && !flags.lazy && !flags.nonInteractive) {
@@ -409,132 +214,39 @@ module.exports = async ({ input, flags }) => {
       },
     ]);
 
-    flags.lazy = useLazy;
+    context.flags.lazy = useLazy;
   }
 
-  perf.start();
-  let totalInstalls = 0;
+  // INSTALL PROCESS START:
 
-  const dependencyManager = (await fileExists(resolve(projectDir, "yarn.lock")))
+  perf.start();
+
+  context.dependencyManager = (await fileExists(
+    resolve(projectDir, "yarn.lock")
+  ))
     ? "yarn"
     : "npm";
 
+  let totalInstalls = 0;
+
   // Install process
-  for (let depName of targetPackages) {
-    const existingDependency = dependencyMap[targetDependency];
-
-    let source = "dependencies";
-
-    if (existingDependency && existingDependency.packs[depName]) {
-      const { version, source: theSource } =
-        existingDependency.packs[depName] || {};
-
-      source = theSource;
-
-      if (version === targetVersion) {
-        ui.log.write("");
-        ui.log.write(`Already installed (${targetVersion})`);
-        ui.log.write(chalk.green(`${depName} ✓`));
-        ui.log.write("");
-        continue;
-      }
-    } else if (!flags.newInstallsMode) {
-      const { targetSource } = await inquirer.prompt([
-        {
-          type: "list",
-          name: "targetSource",
-          message: `Select dependency installation type for "${depName}"`,
-          pageSize: 3,
-          choices: [
-            { name: "dependencies" },
-            { name: "devDependencies" },
-            { name: "peerDependencies" },
-          ].filter(Boolean),
-        },
-      ]);
-
-      source = targetSource;
-    } else {
-      source = {
-        prod: "dependencies",
-        dev: "devDependencies",
-        peer: "peerDependencies",
-      }[flags.newInstallsMode];
-    }
-
-    const {
-      path: packageDir,
-      config: { name: packageName },
-    } = packages.find(({ config: { name } }) => name === depName);
-
-    const sourceParam = {
-      yarn: {
-        devDependencies: "--dev",
-        peerDependencies: "--peer",
-      },
-      npm: {
-        dependencies: "--save",
-        devDependencies: "--save-dev",
-      },
-    }[dependencyManager][source || "dependencies"];
-
-    if (
-      // If we're running in lazy mode
-      flags.lazy ||
-      // Or if we're dealing with a peer dependency via npm
-      (source === "peerDependencies" && dependencyManager === "npm")
-    ) {
-      const packageJsonPath = resolve(packageDir, "package.json");
-      const targetPackageJson = require(packageJsonPath);
-
-      fs.writeFileSync(
-        packageJsonPath,
-        modifyPackageJson(targetPackageJson, {
-          [source]: { [targetDependency]: targetVersionResolved },
-        })
-      );
-
-      ui.log.write(
-        chalk`{white.bold ${packageName}}: {green package.json updated ✓}\n`
-      );
-    } else {
-      const installCmd =
-        dependencyManager === "yarn"
-          ? composeCommand(
-              "yarn",
-              "add",
-              sourceParam,
-              flags.installArgs,
-              `${targetDependency}@${targetVersion}`
-            )
-          : composeCommand(
-              "npm",
-              "install",
-              sourceParam,
-              flags.installArgs,
-              `${targetDependency}@${targetVersion}`
-            );
-
-      await runCommand(`cd ${packageDir} && ${installCmd}`, {
-        startMessage: `${chalk.white.bold(depName)}: ${installCmd}`,
-        endMessage: chalk.green(`${depName} ✓`),
-        logTime: true,
-      });
-    }
-    totalInstalls++;
+  for (let job of jobs) {
+    totalInstalls += await runJob(job, context);
   }
+
+  // INSTALL END
 
   // Final install lazy install after package.json files have been modified
   if (flags.lazy) {
     ui.log.write("");
 
     const installCmd = composeCommand(
-      dependencyManager === "yarn" ? "yarn" : "npm install",
+      context.dependencyManager === "yarn" ? "yarn" : "npm install",
       flags.installArgs
     );
 
     await runCommand(`cd ${projectDir} && ${installCmd}`, {
-      startMessage: `${chalk.white.bold(projectName)}: ${installCmd}`,
+      startMessage: `${chalk.white.bold(context.projectName)}: ${installCmd}`,
       endMessage: chalk.green(`Packages installed ✓`),
       logTime: true,
     });
@@ -574,7 +286,9 @@ module.exports = async ({ input, flags }) => {
         message: "Enter a name for your branch:",
         when: ({ shouldCreateGitBranch }) => shouldCreateGitBranch,
         default: sanitizeGitBranchName(
-          `${userName}/${targetDependency}-${targetVersion}`
+          jobs.length === 1
+            ? `${userName}/${jobs[0].targetDependency}-${jobs[0].targetVersionResolved}`
+            : `${userName}/upgrade-dependencies`
         ),
       },
       {
@@ -587,7 +301,10 @@ module.exports = async ({ input, flags }) => {
         name: "gitCommitMessage",
         message: "Enter a git commit message:",
         when: ({ shouldCreateGitCommit }) => shouldCreateGitCommit,
-        default: `Upgrade dependency: ${targetDependency}@${targetVersion}`,
+        default:
+          jobs.length === 1
+            ? `Update dependency: ${jobs[0].targetDependency}@${jobs[0].targetVersionResolved}`
+            : `Update ${jobs.length} dependencies`,
       },
     ]);
 
@@ -600,19 +317,7 @@ module.exports = async ({ input, flags }) => {
     }
 
     if (shouldCreateGitCommit) {
-      const subMessage = targetPackages
-        .reduce((prev, depName) => {
-          const fromVersion =
-            !isNewDependency &&
-            dependencyMap[targetDependency].packs[depName].version;
-
-          if (fromVersion === targetVersion) return prev;
-
-          return fromVersion
-            ? [...prev, `* ${depName}: ${fromVersion} →  ${targetVersion}`]
-            : [...prev, `* ${depName}: ${targetVersion}`];
-        }, [])
-        .join("\n");
+      const subMessage = generateGitCommitMessage(context, jobs);
 
       const createCmd = `git add . && git commit -m '${gitCommitMessage}' -m '${subMessage}'`;
       await runCommand(`cd ${projectDir} && ${createCmd}`, {

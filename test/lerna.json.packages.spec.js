@@ -61,6 +61,10 @@ describe("lerna.json `packages` configuration", () => {
 
         >>> input ENTER
 
+        ? Confirm or edit installations
+
+        >>> input ENTER
+
         ? It looks like you are using Yarn Workspaces!
          A single install at the end is recommended to save time.
          Note: You can enable this automatically using the --lazy flag
@@ -104,6 +108,10 @@ describe("lerna.json `packages` configuration", () => {
         ? Select version to install:
 
         >>> input ARROW_UP
+        >>> input ENTER
+
+        ? Confirm or edit installations
+
         >>> input ENTER
 
         ? Do you want to create a new git branch for the change? (Y/n)
@@ -169,6 +177,10 @@ describe("lerna.json `packages` configuration", () => {
          ? Select version to install:
 
          >>> input ARROW_UP
+         >>> input ENTER
+
+         ? Confirm or edit installations
+
          >>> input ENTER
 
          ❯ dependencies

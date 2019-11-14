@@ -64,7 +64,7 @@ describe("Noninteractive mode", () => {
       });
 
       describe("and setting --packages", () => {
-        it("should complain about missing flag", async () => {
+        it("installs the dependency", async () => {
           await runProgram(projectPath, `Installed 1 packages in`, {
             flags:
               "--non-interactive --dependency lodash@0.2.1 --new-installs-mode dev --packages packages/sub-package",
