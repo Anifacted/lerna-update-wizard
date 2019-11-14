@@ -8,6 +8,8 @@ const inquirer = require("inquirer");
 const runCommand = require("./utils/runCommand");
 const lines = require("./utils/lines");
 
+let jobs = [];
+
 const createJobWizard = async ({
   flags,
   projectName,
@@ -17,6 +19,13 @@ const createJobWizard = async ({
 }) => {
   ui.log.write(`Starting update wizard for ${chalk.white.bold(projectName)}`);
   ui.log.write("");
+
+  // Filter out depenencies that have already been queued for installation
+  // in a different job
+  const queuedDependencies = jobs.map(job => job.targetDependency);
+  const installableDependencies = allDependencies.filter(
+    depName => !queuedDependencies.includes(depName)
+  );
 
   let targetDependency =
     flags.dependency && parseDependency(flags.dependency).name;
@@ -47,13 +56,13 @@ const createJobWizard = async ({
             : undefined;
 
           let results = input
-            ? allDependencies
+            ? installableDependencies
                 .filter(name => new RegExp(input).test(name))
                 .sort(sorter)
                 .map(itemize)
-            : allDependencies.sort(sorter).map(itemize);
+            : installableDependencies.sort(sorter).map(itemize);
 
-          if (input && !allDependencies.includes(input)) {
+          if (input && !installableDependencies.includes(input)) {
             results = [
               ...results,
               {
@@ -88,7 +97,7 @@ const createJobWizard = async ({
   }
 
   // Target packages selection
-  const isNewDependency = !allDependencies.includes(targetDependency);
+  const isNewDependency = !installableDependencies.includes(targetDependency);
 
   if (flags.nonInteractive && isNewDependency) {
     invariant(
@@ -227,8 +236,6 @@ const createJobWizard = async ({
     isNewDependency,
   };
 };
-
-let jobs = [];
 
 const composeJobsWizard = async context => {
   const create = async () => {
