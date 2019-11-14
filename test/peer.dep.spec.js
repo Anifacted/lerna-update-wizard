@@ -55,8 +55,9 @@ describe("Peer dependency", async () => {
           >>> input ARROW_DOWN
           >>> input ENTER
 
-          package.json updated
-          sub-package-a ✓
+          sub-package-a:
+            treediff@0.2.5
+            package.json updated ✓
 
           >>> input CTRL+C
         `

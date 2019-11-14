@@ -22,6 +22,8 @@ const runJob = async (job, context) => {
 
   const { dependencyMap, flags, packages, dependencyManager } = context;
 
+  ui.log.write("\n");
+
   for (let targetPackageName of targetPackages) {
     const existingDependency = dependencyMap[targetDependency];
 
@@ -34,10 +36,14 @@ const runJob = async (job, context) => {
       source = theSource;
 
       if (version === targetVersion) {
-        ui.log.write("");
-        ui.log.write(`Already installed (${targetVersion})`);
-        ui.log.write(chalk.green(`${targetPackageName} ✓`));
-        ui.log.write("");
+        ui.log.write(
+          lines(
+            chalk`{bold ${targetPackageName}:}`,
+            `  ${targetDependency}@${targetVersion}`,
+            chalk`  {yellow Already installed ✗}`,
+            "\n"
+          )
+        );
         continue;
       }
     } else if (!flags.newInstallsMode) {
@@ -101,10 +107,14 @@ const runJob = async (job, context) => {
         })
       );
 
-      ui.log.write("");
-      ui.log.write(`package.json updated`);
-      ui.log.write(chalk.green(`${targetPackageName} ✓`));
-      ui.log.write("");
+      ui.log.write(
+        lines(
+          chalk`{bold ${targetPackageName}:}`,
+          `  ${targetDependency}@${targetVersion}`,
+          chalk`  {green package.json updated ✓}`,
+          "\n"
+        )
+      );
     } else {
       const installCmd =
         dependencyManager === "yarn"
