@@ -3,6 +3,10 @@
   "bin": {
     "lernaupdate": "./bin/lernaupdate"
   },
+  "files": [
+    "src",
+    "bin"
+  ],
   "version": "0.17.1",
   "main": "index.js",
   "license": "MIT",
