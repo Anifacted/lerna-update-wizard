@@ -48,34 +48,34 @@ describe("modifyPackageJson", () => {
       "to equal",
       `{
   "name": "lerna-update-wizard",
+  "bin": {
+    "lernaupdate": "./bin/lernaupdate"
+  },
+  "version": "0.12.0",
+  "main": "index.js",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/Anifacted/lerna-update-wizard"
-  },
-  "version": "0.12.0",
-  "main": "index.js",
-  "bin": {
-    "lernaupdate": "./bin/lernaupdate"
-  },
-  "scripts": {
-    "test": "jest --verbose --runInBand"
   },
   "dependencies": {
     "chalk": "^2.3.0",
     "d3": "3",
     "semver-compare": "^1.0.0"
   },
-  "peerDependencies": {
-    "underscore": "~2"
-  },
   "devDependencies": {
     "lodash": "3"
   },
+  "scripts": {
+    "test": "jest --verbose --runInBand"
+  },
   "jest": {
     "testURL": "http://localhost"
+  },
+  "peerDependencies": {
+    "underscore": "~2"
   }
-}\n`
+}`
     );
   });
 });
