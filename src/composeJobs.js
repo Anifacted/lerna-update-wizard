@@ -49,18 +49,23 @@ const createJobWizard = async ({
             )}`,
           });
 
-          const sorter = flags.dedupe
-            ? (a, b) =>
+          let results = installableDependencies.filter(
+            input ? name => new RegExp(input).test(name) : () => true
+          );
+
+          if (flags.dedupe) {
+            results = results.sort(
+              (a, b) =>
                 dependencyMap[b].versions.length -
                 dependencyMap[a].versions.length
-            : undefined;
+            );
+          } else if (input && input.length > 2) {
+            results = results.sort((a, b) => a.length - b.length);
+          } else {
+            results = results.sort();
+          }
 
-          let results = input
-            ? installableDependencies
-                .filter(name => new RegExp(input).test(name))
-                .sort(sorter)
-                .map(itemize)
-            : installableDependencies.sort(sorter).map(itemize);
+          results = results.map(itemize);
 
           if (input && !installableDependencies.includes(input)) {
             results = [
