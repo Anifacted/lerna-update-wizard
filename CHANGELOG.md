@@ -1,3 +1,14 @@
+### v0.17.2 (2019-11-15)
+
+#### Pull requests
+
+- [#54](https://github.com/Anifacted/lerna-update-wizard/pull/54) Stop formatting package.json files with `prettier-package-json` ([Marc Høegh](mailto:mhoegh90@gmail.com))
+
+#### Commits to master
+
+- [Optimize the published NPM package](https://github.com/Anifacted/lerna-update-wizard/commit/1d08f640f4e21676d7711b78d6b32a2efd93a9fd) ([Marc Høegh](mailto:mhoegh90@gmail.com))
+- [Update changelog](https://github.com/Anifacted/lerna-update-wizard/commit/5b53b1eaca7391ec9fa35f55aed8e487e7dd2ca1) ([Marc Høegh](mailto:mhoegh90@gmail.com))
+
 ### v0.17.1 (2019-11-15)
 
 #### Pull requests
