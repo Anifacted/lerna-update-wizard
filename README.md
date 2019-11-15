@@ -63,7 +63,7 @@ $ lernaupdate ~/projects/my-lerna-project
 
 ### Add/Update multiple dependencies in one session
 
-You can **batch** updates for multiple dependencies into one session. Choose the `+ Add another` after you've specified the details for the first update task.
+You can **batch** updates for multiple dependencies into one session. Choose `+ Add another` after you've specified the details for the first update task.
 
 ![Add packages](/public/multiple-jobs.png?raw=true "Confirm installation")
 
