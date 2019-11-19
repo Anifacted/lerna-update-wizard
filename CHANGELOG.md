@@ -1,3 +1,13 @@
+### v0.17.4 (2019-11-19)
+
+#### Pull requests
+
+- [#57](https://github.com/Anifacted/lerna-update-wizard/pull/57) modifyPackageJson: Respect new lines and whitespaces in package.json file ending ([Marc Høegh](mailto:mhoegh90@gmail.com))
+
+#### Commits to master
+
+- [Update changelog](https://github.com/Anifacted/lerna-update-wizard/commit/1ec6da76e8ddcc2eca32450328e03a3a53ed066e) ([Marc Høegh](mailto:mhoegh90@gmail.com))
+
 ### v0.17.3 (2019-11-19)
 
 #### Pull requests
