@@ -22,7 +22,7 @@
     "inquirer-autocomplete-prompt": "^0.12.1",
     "lodash": "^4.17.4",
     "meow": "^4.0.0",
-    "fs-extra": "^7.0.0",    
+    "fs-extra": "^7.0.0",
     "minimist": "^1.2.0",
     "semver-compare": "^1.0.0"
   },
@@ -42,6 +42,15 @@
     "release": "node-publisher release",
     "travis": "npm test"
   },
+  "keywords": [
+    "dependency manager",
+    "bulk update",
+    "monorepo",
+    "lerna",
+    "yarn workspaces",
+    "workspace",
+    "dependencies"
+  ],
   "jest": {
     "testURL": "http://localhost"
   }
