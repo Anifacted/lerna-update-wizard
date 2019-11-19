@@ -1,3 +1,15 @@
+### v0.17.3 (2019-11-19)
+
+#### Pull requests
+
+- [#56](https://github.com/Anifacted/lerna-update-wizard/pull/56) fix: missing dependency on fs-extra ([Elad Ben-Israel](mailto:benisrae@amazon.com))
+
+#### Commits to master
+
+- [package.json: Add keywords for NPM](https://github.com/Anifacted/lerna-update-wizard/commit/3204b29ea65b0b8ef7c9c89af35aa564d8619717) ([Marc Høegh](mailto:mhoegh90@gmail.com))
+- [Fix readme typo](https://github.com/Anifacted/lerna-update-wizard/commit/84720b54ed7295e1cca3ff21d9af8bf007d4bcae) ([Marc Høegh](mailto:mhoegh90@gmail.com))
+- [Update changelog](https://github.com/Anifacted/lerna-update-wizard/commit/6767f884e44e8b20677a92b11632f628deef71ab) ([Marc Høegh](mailto:mhoegh90@gmail.com))
+
 ### v0.17.2 (2019-11-15)
 
 #### Pull requests
