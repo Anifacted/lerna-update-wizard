@@ -1,12 +1,15 @@
 const merge = require("lodash/merge");
 const sortBy = require("lodash/sortBy");
 const fromPairs = require("lodash/fromPairs");
+const fs = require("fs-extra");
 
 const sortByKeys = object =>
   fromPairs(sortBy(Object.keys(object)).map(key => [key, object[key]]));
 
-module.exports = (basePackageJson, modificationsBlob) => {
-  const merged = merge(basePackageJson, modificationsBlob);
+module.exports = (basePackageJsonPath, modificationsBlob) => {
+  const basePackageJson = fs.readFileSync(basePackageJsonPath, "utf8");
+  const fileEndMatch = basePackageJson.match(/}((\s|\n)+$)/);
+  const merged = merge(JSON.parse(basePackageJson), modificationsBlob);
 
   merged.dependencies = merged.dependencies && sortByKeys(merged.dependencies);
 
@@ -16,5 +19,11 @@ module.exports = (basePackageJson, modificationsBlob) => {
   merged.peerDependencies =
     merged.peerDependencies && sortByKeys(merged.peerDependencies);
 
-  return JSON.stringify(merged, null, 2);
+  let mergedResult = JSON.stringify(merged, null, 2);
+
+  if (fileEndMatch) {
+    mergedResult = mergedResult.replace(/}$/, fileEndMatch[0]);
+  }
+
+  return mergedResult;
 };
