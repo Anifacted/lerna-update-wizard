@@ -98,11 +98,10 @@ const runJob = async (job, context) => {
       (source === "peerDependencies" && dependencyManager === "npm")
     ) {
       const packageJsonPath = resolve(packageDir, "package.json");
-      const targetPackageJson = require(packageJsonPath);
 
       fs.writeFileSync(
         packageJsonPath,
-        modifyPackageJson(targetPackageJson, {
+        modifyPackageJson(packageJsonPath, {
           [source]: { [targetDependency]: targetVersionResolved },
         })
       );

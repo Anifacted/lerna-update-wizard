@@ -1,7 +1,27 @@
 const expect = require("unexpected");
 const modifyPackageJson = require("./modifyPackageJson");
+const { resolve } = require("path");
+const fs = require("fs-extra");
 
-const baseJson = JSON.parse(`{
+describe("modifyPackageJson", () => {
+  it("should work", () => {
+    const mods = {
+      dependencies: {
+        d3: "3",
+      },
+      devDependencies: {
+        lodash: "3",
+      },
+      peerDependencies: {
+        underscore: "~2",
+      },
+    };
+
+    const outputPath = resolve("tmp", "modifyPackageJson-test", "package.json");
+
+    fs.outputFileSync(
+      outputPath,
+      `{
   "name": "lerna-update-wizard",
   "bin": {
     "lernaupdate": "./bin/lernaupdate"
@@ -25,26 +45,16 @@ const baseJson = JSON.parse(`{
   "jest": {
     "testURL": "http://localhost"
   }
-}`);
+}
+\t
 
-describe("modifyPackageJson", () => {
-  it("should work", () => {
-    const mods = {
-      dependencies: {
-        d3: "3",
-      },
-      devDependencies: {
-        lodash: "3",
-      },
-      peerDependencies: {
-        underscore: "~2",
-      },
-    };
+`
+    );
 
     expect(
       modifyPackageJson,
       "when called with",
-      [baseJson, mods],
+      [outputPath, mods],
       "to equal",
       `{
   "name": "lerna-update-wizard",
@@ -75,7 +85,10 @@ describe("modifyPackageJson", () => {
   "peerDependencies": {
     "underscore": "~2"
   }
-}`
+}
+\t
+
+`
     );
   });
 });
