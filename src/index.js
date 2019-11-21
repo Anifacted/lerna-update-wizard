@@ -103,42 +103,53 @@ module.exports = async ({ input, flags }) => {
 
   ui.logBottom("");
 
-  const setSourceForDeps = (deps = [], source = "dependencies") =>
-    Object.keys(deps).reduce(
-      (prev, name) => ({
-        ...prev,
-        [name]: {
-          version: deps[name],
-          source,
-        },
-      }),
-      {}
-    );
+  const setSourceForDeps = (deps = [], source = "dependencies") => (
+    Object.keys(deps)
+      .map(name => ({ [name]: { version: deps[name], source } }))
+  );
 
   const dependencies = packages.reduce(
     (
       prev,
       { config: { dependencies, devDependencies, peerDependencies, name } }
-    ) => ({
-      ...prev,
-      [name]: {
-        ...setSourceForDeps(dependencies),
-        ...setSourceForDeps(devDependencies, "devDependencies"),
-        ...setSourceForDeps(peerDependencies, "peerDependencies"),
-      },
-    }),
-    {}
+    ) => {
+      return {
+        ...prev,
+        [name]: [
+          ...setSourceForDeps(dependencies),
+          ...setSourceForDeps(devDependencies, "devDependencies"),
+          ...setSourceForDeps(peerDependencies, "peerDependencies"),
+        ].reduce(
+          (sourcedDeps, sourcedDep) => {
+            for (const depName of Object.keys(sourcedDep)) {
+              if (!sourcedDeps[depName]) {
+                sourcedDeps[depName] = [];
+              }
+
+              sourcedDeps[depName].push(sourcedDep[depName]);
+            }
+
+            return sourcedDeps;
+          },
+          {},
+        ),
+      };
+    },
+    {},
   );
 
   let dependencyMap = packages.reduce(
-    (prev, { config: { name: packageName } }) => {
+    (prev, package) => {
+      const { config: { name: packageName } } = package;
       const packDeps = dependencies[packageName];
       return {
         ...prev,
         ...Object.keys(packDeps).reduce((prev, dep) => {
-          const { version, source } = packDeps[dep];
           const prevDep = prev[dep] || { packs: {}, versions: [] };
-          const versions = uniq([...prevDep.versions, version]);
+          const versions = uniq([
+            ...prevDep.versions,
+            ...packDeps[dep].map(({ version }) => version),
+          ]);
 
           let color = "grey";
           const count = versions.length;
@@ -153,7 +164,7 @@ module.exports = async ({ input, flags }) => {
               name: dep,
               packs: {
                 ...prevDep.packs,
-                [packageName]: { version, source },
+                [packageName]: packDeps[dep],
               },
               versions,
               color,
