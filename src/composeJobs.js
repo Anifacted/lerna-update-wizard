@@ -153,26 +153,19 @@ const createJobWizard = async ({
             };
           }
 
-          // (1.0.0) (dev) => (1.0.0 (dev), 2.0.0)
-
-          /*const { version, source } =
-            dependencyMap[targetDependency].packs[packageName] || {};
-
-          const versionBit = version ? ` (${version})` : "";
-          const sourceBit =
-            source === "devDependencies" ? chalk.white(" (dev)") : "";*/
-
+          let name = packageName;
           const versions = dependencyMap[targetDependency].packs[packageName];
-          let info = "";
           if (versions) {
-            info = ` (${versions.map(({ version, source }) => (source === "devDependencies" ? `${chalk.yellow(version)} (dev)` : chalk.yellow(version) ))
-              .join(', ')})`;
+            const versionStrs = versions.map(({ version, source }) => (
+              `${chalk.yellow(version)}${source === "devDependencies" ? ' dev' : '' }`
+            ));
+            name = `${name} (${versionStrs.join(', ')})`;
           }
 
           return {
-            name: `${packageName}${info}`, //`${packageName}${versionBit}${sourceBit}`,
+            name,
             value: packageName,
-            checked: !!versions,// !!version,
+            checked: !!versions,
           };
         }),
       },
