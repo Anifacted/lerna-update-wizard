@@ -139,8 +139,8 @@ module.exports = async ({ input, flags }) => {
   );
 
   let dependencyMap = packages.reduce(
-    (prev, package) => {
-      const { config: { name: packageName } } = package;
+    (prev, pack) => {
+      const { config: { name: packageName } } = pack;
       const packDeps = dependencies[packageName];
       return {
         ...prev,
