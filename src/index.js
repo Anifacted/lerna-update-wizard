@@ -103,10 +103,10 @@ module.exports = async ({ input, flags }) => {
 
   ui.logBottom("");
 
-  const setSourceForDeps = (deps = [], source = "dependencies") => (
-    Object.keys(deps)
-      .map(name => ({ [name]: { version: deps[name], source } }))
-  );
+  const setSourceForDeps = (deps = [], source = "dependencies") =>
+    Object.keys(deps).map(name => ({
+      [name]: { version: deps[name], source },
+    }));
 
   const dependencies = packages.reduce(
     (
@@ -119,28 +119,24 @@ module.exports = async ({ input, flags }) => {
           ...setSourceForDeps(dependencies),
           ...setSourceForDeps(devDependencies, "devDependencies"),
           ...setSourceForDeps(peerDependencies, "peerDependencies"),
-        ].reduce(
-          (sourcedDeps, sourcedDep) => {
-            for (const depName of Object.keys(sourcedDep)) {
-              if (!sourcedDeps[depName]) {
-                sourcedDeps[depName] = [];
-              }
-
-              sourcedDeps[depName].push(sourcedDep[depName]);
+        ].reduce((sourcedDeps, sourcedDep) => {
+          for (const depName of Object.keys(sourcedDep)) {
+            if (!sourcedDeps[depName]) {
+              sourcedDeps[depName] = [];
             }
 
-            return sourcedDeps;
-          },
-          {},
-        ),
+            sourcedDeps[depName].push(sourcedDep[depName]);
+          }
+
+          return sourcedDeps;
+        }, {}),
       };
     },
-    {},
+    {}
   );
 
   let dependencyMap = packages.reduce(
-    (prev, package) => {
-      const { config: { name: packageName } } = package;
+    (prev, { config: { name: packageName } }) => {
       const packDeps = dependencies[packageName];
       return {
         ...prev,

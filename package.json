@@ -31,7 +31,9 @@
     "eslint": "^4.14.0",
     "eslint-config-pretty-standard": "^1.1.0",
     "jest": "^23.4.2",
+    "lint-staged": "^9.4.3",
     "node-publisher": "^1.4.0",
+    "pre-commit": "^1.2.2",
     "prettier": "^1.9.2",
     "sinon": "^6.1.4",
     "unexpected": "^10.38.0",
@@ -40,7 +42,11 @@
   "scripts": {
     "test": "jest --verbose --runInBand",
     "release": "node-publisher release",
-    "travis": "npm test"
+    "travis": "npm run lint && npm run format && npm run isGitClean && npm test",
+    "isGitClean": "./bin/is_git_clean",
+    "lint": "eslint 'src/**/*.js'",
+    "format": "./node_modules/.bin/prettier --write 'src/**/*.js'",
+    "lint-staged": "lint-staged"
   },
   "keywords": [
     "dependency manager",
@@ -53,5 +59,13 @@
   ],
   "jest": {
     "testURL": "http://localhost"
+  },
+  "pre-commit": "lint-staged",
+  "lint-staged": {
+    "*.js": [
+      "npm run format",
+      "npm run lint",
+      "git add"
+    ]
   }
 }

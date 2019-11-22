@@ -8,15 +8,9 @@ describe("generateGitCommitMessage", () => {
       dependencyMap: {
         lodash: {
           packs: {
-            "package-a": [
-              { version: "1.2.0", source: "dependencies" },
-            ],
-            "package-b": [
-              { version: "1.3.0", source: "devDependencies" },
-            ],
-            "package-c": [
-              { version: "1.4.0", source: "devDependencies" },
-            ],
+            "package-a": [{ version: "1.2.0", source: "dependencies" }],
+            "package-b": [{ version: "1.3.0", source: "devDependencies" }],
+            "package-c": [{ version: "1.4.0", source: "devDependencies" }],
           },
           versions: ["1.2.0", "1.3.0", "1.4.0"],
           name: "lodash",
@@ -24,9 +18,7 @@ describe("generateGitCommitMessage", () => {
         },
         underscore: {
           packs: {
-            "package-a": [
-              { version: "3.0.0", source: "dependencies" },
-            ],
+            "package-a": [{ version: "3.0.0", source: "dependencies" }],
           },
           versions: ["3.0.0"],
           name: "lodash",

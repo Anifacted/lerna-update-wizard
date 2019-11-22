@@ -10,8 +10,8 @@ const cycle = (length, currentIndex, backwards) =>
       ? length - 1
       : currentIndex - 1
     : currentIndex + 1 >= length
-      ? 0
-      : currentIndex + 1;
+    ? 0
+    : currentIndex + 1;
 
 module.exports = class SemverListPrompt extends Base {
   _run(cb) {
