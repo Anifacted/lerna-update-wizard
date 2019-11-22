@@ -40,7 +40,10 @@
   "scripts": {
     "test": "jest --verbose --runInBand",
     "release": "node-publisher release",
-    "travis": "npm test"
+    "travis": "npm run lint && npm run format && npm run isGitClean && npm test",
+    "isGitClean": "./bin/is_git_clean",
+    "lint": "eslint 'src/**/*.js'",
+    "format": "./node_modules/.bin/prettier --write 'src/**/*.js'"
   },
   "keywords": [
     "dependency manager",

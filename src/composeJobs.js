@@ -156,10 +156,13 @@ const createJobWizard = async ({
           let name = packageName;
           const versions = dependencyMap[targetDependency].packs[packageName];
           if (versions) {
-            const versionStrs = versions.map(({ version, source }) => (
-              `${chalk.yellow(version)}${source === "devDependencies" ? ' dev' : '' }`
-            ));
-            name = `${name} (${versionStrs.join(', ')})`;
+            const versionStrs = versions.map(
+              ({ version, source }) =>
+                `${chalk.yellow(version)}${
+                  source === "devDependencies" ? " dev" : ""
+                }`
+            );
+            name = `${name} (${versionStrs.join(", ")})`;
           }
 
           return {

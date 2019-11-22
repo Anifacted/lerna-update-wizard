@@ -25,11 +25,13 @@ const runJob = async (job, context) => {
   ui.log.write("\n");
 
   for (let targetPackageName of targetPackages) {
-    const sources = []
+    const sources = [];
     const existingDependency = dependencyMap[targetDependency];
     if (existingDependency && existingDependency.packs[targetPackageName]) {
       const skippedSources = [];
-      for ( const { source, version } of existingDependency.packs[targetPackageName]) {
+      for (const { source, version } of existingDependency.packs[
+        targetPackageName
+      ]) {
         sources.push(source);
         if (version === targetVersion) {
           skippedSources.push(source);
@@ -44,7 +46,7 @@ const runJob = async (job, context) => {
               `  ${targetDependency}@${targetVersion} in ${source}`,
               chalk`  {yellow Already installed ✗}`,
               "\n"
-            ),
+            )
           );
         }
 
@@ -78,7 +80,7 @@ const runJob = async (job, context) => {
           prod: "dependencies",
           dev: "devDependencies",
           peer: "peerDependencies",
-        }[flags.newInstallsMode],
+        }[flags.newInstallsMode]
       );
     }
 

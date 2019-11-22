@@ -6,7 +6,7 @@ module.exports = signature => {
   let version;
   if (firstIndex !== lastIndex) {
     name = signature.substring(0, lastIndex);
-    version = signature.substring(lastIndex + 1);  
+    version = signature.substring(lastIndex + 1);
   } else if (firstIndex > 0) {
     [name, version] = signature.split("@");
   } else {

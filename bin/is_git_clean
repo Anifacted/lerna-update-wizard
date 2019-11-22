@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+if [ -n "$(git status --untracked-files=no -z src/ packages/)" ]
+then
+  echo '**********************************'
+  echo 'Git is not clean!'
+  echo '**********************************'
+  echo ''
+  echo 'Diff printed below:'
+  git diff
+  exit 1
+fi
