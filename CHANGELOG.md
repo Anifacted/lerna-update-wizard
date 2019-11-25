@@ -1,3 +1,16 @@
+### v0.17.5 (2019-11-25)
+
+#### Pull requests
+
+- [#62](https://github.com/Anifacted/lerna-update-wizard/pull/62) Add tooling for easier collaboration ([Marc Høegh](mailto:mhoegh90@gmail.com))
+- [#60](https://github.com/Anifacted/lerna-update-wizard/pull/60) Update multiple sources ([Christian Achgill](mailto:cachgill@cachgillmbp.local))
+
+#### Commits to master
+
+- [Increase timeout timing in tests](https://github.com/Anifacted/lerna-update-wizard/commit/0005e1b0d08ff94fa6c964170c8b5cfc8a59511e) ([Marc Høegh](mailto:mhoegh90@gmail.com))
+- [Fix problematic tests](https://github.com/Anifacted/lerna-update-wizard/commit/585fdf057b452d3d8530c748b410bdaca23bf57e) ([Marc Høegh](mailto:mhoegh90@gmail.com))
+- [Update changelog](https://github.com/Anifacted/lerna-update-wizard/commit/c40ed562c49e967362647f7f2d5b0cdbca34fa08) ([Marc Høegh](mailto:mhoegh90@gmail.com))
+
 ### v0.17.4 (2019-11-19)
 
 #### Pull requests
