@@ -9,7 +9,7 @@ describe("Adding new dependency", async () => {
     // eslint-disable-next-line
     jest.setTimeout(100000);
     const projectPath = await generateProject({
-      name: "project-a",
+      name: "project-add-dependency-basic",
       packages: [
         { name: "sub-package-a" },
         {
@@ -96,13 +96,13 @@ describe("Adding new dependency", async () => {
     );
   });
 
-  describe("non-interactive", () => {
-    it("Adds the dependency via the --dependency flag", async () => {
+  describe("via --dependency flag", () => {
+    it("Correctly adds dependency specified in --dependency flag", async () => {
       // eslint-disable-next-line
       jest.setTimeout(100000);
 
       const projectPath = await generateProject({
-        name: "project-add-dependency-non-interactive",
+        name: "project-add-dependency-with-flag",
         packages: [
           { name: "sub-package-a" },
           {
