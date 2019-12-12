@@ -1,3 +1,15 @@
+### v0.17.6 (2019-12-12)
+
+#### Pull requests
+
+- [#63](https://github.com/Anifacted/lerna-update-wizard/pull/63) Bump inquirer and inquirer-autocomplete-prompt ([Brian Zhao](mailto:rezha@microsoft.com))
+
+#### Commits to master
+
+- [Update package-lock.json](https://github.com/Anifacted/lerna-update-wizard/commit/bf56dc394ce980994115c3c3ea8d8f6abdacd1ae) ([Marc Høegh](mailto:mhoegh90@gmail.com))
+- [Remove .npmrc](https://github.com/Anifacted/lerna-update-wizard/commit/9a8e0dda6cfda140b5bba338406a6a7766ba93cd) ([Marc Høegh](mailto:mhoegh90@gmail.com))
+- [Update changelog](https://github.com/Anifacted/lerna-update-wizard/commit/c8adc53a7478d5a58af5ac45fc2ff654650c11e5) ([Marc Høegh](mailto:mhoegh90@gmail.com))
+
 ### v0.17.5 (2019-11-25)
 
 #### Pull requests
