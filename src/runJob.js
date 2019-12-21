@@ -64,24 +64,29 @@ const runJob = async (job, context) => {
             chalk`  {reset.green + ${targetDependency} ${targetVersionResolved}}`,
             ""
           ),
-          pageSize: 3,
+          pageSize: 4,
           choices: [
             { name: "dependencies" },
             { name: "devDependencies" },
             { name: "peerDependencies" },
+            { name: "ignore" },
           ].filter(Boolean),
         },
       ]);
 
-      sources.push(targetSource);
+      if (targetSource !== 'ignore') {
+        sources.push(targetSource);
+      }
     } else {
-      sources.push(
-        {
-          prod: "dependencies",
-          dev: "devDependencies",
-          peer: "peerDependencies",
-        }[flags.newInstallsMode]
-      );
+      if (flags.newInstallsMode !== 'ignore') {
+        sources.push(
+          {
+            prod: "dependencies",
+            dev: "devDependencies",
+            peer: "peerDependencies",
+          }[flags.newInstallsMode]
+        );
+      }
     }
 
     const { path: packageDir } = packages.find(
