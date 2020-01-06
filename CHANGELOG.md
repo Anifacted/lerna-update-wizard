@@ -1,3 +1,13 @@
+### v0.17.7 (2020-01-06)
+
+#### Pull requests
+
+- [#68](https://github.com/Anifacted/lerna-update-wizard/pull/68) modifyPackageJson: Use existing indentation when writing to file ([Marc Høegh](mailto:mhoegh90@gmail.com))
+
+#### Commits to master
+
+- [Update changelog](https://github.com/Anifacted/lerna-update-wizard/commit/e2b05a77077cc967a6b23a1406fc93c602b020cb) ([Marc Høegh](mailto:mhoegh90@gmail.com))
+
 ### v0.17.6 (2019-12-12)
 
 #### Pull requests
