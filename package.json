@@ -23,7 +23,7 @@
     "lodash": "^4.17.4",
     "meow": "^4.0.0",
     "fs-extra": "^7.0.0",
-    "minimist": "^1.2.0",
+    "minimist": "^1.2.2",
     "semver-compare": "^1.0.0"
   },
   "devDependencies": {
