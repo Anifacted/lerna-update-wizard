@@ -34,6 +34,12 @@ Or from the outside by specifying the path to the project:
 $ lernaupdate ~/projects/my-lerna-project
 ```
 
+Or run it using npx
+
+```bash
+$ npx lerna-update-wizard
+```
+
 ## Features
 
 ### Update dependencies across packages
