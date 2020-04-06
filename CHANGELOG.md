@@ -1,3 +1,17 @@
+### v0.17.8 (2020-04-06)
+
+#### Pull requests
+
+- [#75](https://github.com/Anifacted/lerna-update-wizard/pull/75) Bump minimist from 1.2.2 to 1.2.3 ([dependabot[bot]](mailto:49699333+dependabot[bot]@users.noreply.github.com))
+- [#72](https://github.com/Anifacted/lerna-update-wizard/pull/72) Bump minimist from 1.2.0 to 1.2.2 ([dependabot[bot]](mailto:49699333+dependabot[bot]@users.noreply.github.com))
+- [#74](https://github.com/Anifacted/lerna-update-wizard/pull/74) Add npx to README ([Pavel Žák](mailto:pavel@zak.global))
+
+#### Commits to master
+
+- [v0.17.8](https://github.com/Anifacted/lerna-update-wizard/commit/43498beb9052e7485fee485adc59ac9cbe864807) ([Marc Høegh](mailto:mhoegh90@gmail.com))
+- [Run prettier](https://github.com/Anifacted/lerna-update-wizard/commit/192e32eef60b053f4fc4d7239996a8e4ff633691) ([Marc Høegh](mailto:mhoegh90@gmail.com))
+- [Update changelog](https://github.com/Anifacted/lerna-update-wizard/commit/05c43278de40ab91b05e5d1c0f27ff4b4dda34d5) ([Marc Høegh](mailto:mhoegh90@gmail.com))
+
 ### v0.17.7 (2020-01-06)
 
 #### Pull requests
