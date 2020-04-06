@@ -7,7 +7,7 @@
     "src",
     "bin"
   ],
-  "version": "0.17.7",
+  "version": "0.17.8",
   "main": "index.js",
   "license": "MIT",
   "repository": {
@@ -17,12 +17,12 @@
   "dependencies": {
     "chalk": "^2.3.0",
     "execution-time": "^1.2.0",
+    "fs-extra": "^7.0.0",
     "globby": "^8.0.1",
     "inquirer": "^7.0.0",
     "inquirer-autocomplete-prompt": "^1.0.1",
     "lodash": "^4.17.4",
     "meow": "^4.0.0",
-    "fs-extra": "^7.0.0",
     "minimist": "^1.2.3",
     "semver-compare": "^1.0.0"
   },
