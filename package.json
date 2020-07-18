@@ -21,7 +21,7 @@
     "globby": "^8.0.1",
     "inquirer": "^7.0.0",
     "inquirer-autocomplete-prompt": "^1.0.1",
-    "lodash": "^4.17.4",
+    "lodash": "^4.17.19",
     "meow": "^4.0.0",
     "minimist": "^1.2.3",
     "semver-compare": "^1.0.0"
