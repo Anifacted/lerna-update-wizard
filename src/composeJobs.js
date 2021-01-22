@@ -182,28 +182,54 @@ const createJobWizard = async ({
     flags.dependency && parseDependency(flags.dependency).version;
 
   if (!targetVersion) {
-    const npmVersions = npmPackageInfo.versions.reverse();
-    const npmDistTags = npmPackageInfo["dist-tags"];
+    const tagsByVersion = Object.entries(
+      npmPackageInfo["dist-tags"]
+    ).reduce((prev, [tag, version]) => ({ [version]: tag }));
 
     const highestInstalled =
       !isNewDependency &&
       dependencyMap[targetDependency].versions.sort(semverCompare).pop();
 
-    const availableVersions = [
-      ...Object.entries(npmDistTags).map(([tag, version]) => ({
-        name: `${version} ${chalk.bold(`#${tag}`)}`,
-        value: version,
-      })),
-      !isNewDependency && {
-        name: `${highestInstalled} ${chalk.bold("Highest installed")}`,
-        value: highestInstalled,
-      },
-      ...npmVersions.filter(
-        version =>
-          version !== highestInstalled &&
-          !Object.values(npmDistTags).includes(version)
-      ),
-    ].filter(Boolean);
+    const availableVersions = npmPackageInfo.versions.reverse().map(v => {
+      let name = v;
+
+      if (
+        !isNewDependency &&
+        dependencyMap[targetDependency].versionUsageCount[v]
+      ) {
+        name += chalk.grey(
+          ` x${dependencyMap[targetDependency].versionUsageCount[v]}`
+        );
+      }
+
+      if (tagsByVersion[v]) {
+        name += ` ${chalk.bold(`#${tagsByVersion[v]}`)}`;
+      }
+
+      if (!isNewDependency && v === highestInstalled) {
+        name += chalk.bold(" Highest installed");
+      }
+
+      return { name, value: v };
+    });
+
+    // const availableVersions = [
+    //   // List verions that are #tagged
+    //   // ...Object.entries(npmDistTags).map(([tag, version]) => ({
+    //   //   name: `${version} ${chalk.bold(`#${tag}`)}`,
+    //   //   value: version,
+    //   // })),
+    //   // List the highest installed
+    //   // !isNewDependency && {
+    //   //   name: `${highestInstalled} ${chalk.bold("Highest installed")}`,
+    //   //   value: highestInstalled,
+    //   // },
+    //   // ...npmVersions.filter(
+    //   //   version =>
+    //   //     version !== highestInstalled &&
+    //   //     !Object.values(npmDistTags).includes(version)
+    //   // ),
+    // ].filter(Boolean);
 
     const { targetVersion: promptedTarget } = await inquirer.prompt([
       {

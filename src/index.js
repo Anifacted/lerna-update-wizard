@@ -3,6 +3,7 @@ const inquirer = require("inquirer");
 const chalk = require("chalk");
 const uniq = require("lodash/uniq");
 const orderBy = require("lodash/orderBy");
+const countBy = require("lodash/countBy");
 const globby = require("globby");
 const perf = require("execution-time")();
 
@@ -142,10 +143,11 @@ module.exports = async ({ input, flags }) => {
         ...prev,
         ...Object.keys(packDeps).reduce((prev, dep) => {
           const prevDep = prev[dep] || { packs: {}, versions: [] };
-          const versions = uniq([
+          const allVersions = [
             ...prevDep.versions,
             ...packDeps[dep].map(({ version }) => version),
-          ]);
+          ];
+          const versions = uniq(allVersions);
 
           let color = "grey";
           const count = versions.length;
@@ -163,6 +165,7 @@ module.exports = async ({ input, flags }) => {
                 [packageName]: packDeps[dep],
               },
               versions,
+              versionUsageCount: countBy(allVersions, v => v),
               color,
             },
           };
