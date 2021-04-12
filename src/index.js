@@ -79,10 +79,13 @@ module.exports = async ({ input, flags }) => {
     ? flags.packages.split(",")
     : packagesConfig;
 
-  const packagesRead = await globby(
-    defaultPackagesGlobs.map(glob => resolve(projectDir, glob, "package.json")),
-    { expandDirectories: true }
-  );
+  const packagesRead = [
+    projectPackageJsonPath, 
+    ...await globby(
+      defaultPackagesGlobs.map(glob => resolve(projectDir, glob, "package.json")),
+      { expandDirectories: true }
+    )
+  ]
 
   const packages = orderBy(
     packagesRead.map(path => ({
@@ -263,6 +266,11 @@ module.exports = async ({ input, flags }) => {
 
   ui.log.write(
     chalk.bold(`Installed ${totalInstalls} packages in ${perf.stop().words}`)
+  );
+
+  await runCommand(`lerna link`);
+  ui.log.write(
+    chalk.bold(`Re-linked Lerna packages.`)
   );
 
   if (!flags.nonInteractive) {
