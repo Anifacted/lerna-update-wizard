@@ -9,7 +9,7 @@ describe("Adding new dependency", async () => {
     // eslint-disable-next-line
     jest.setTimeout(100000);
     const projectPath = await generateProject({
-      name: "project-a",
+      name: "project-add-dependency-basic",
       packages: [
         { name: "sub-package-a" },
         {
@@ -69,9 +69,13 @@ describe("Adding new dependency", async () => {
 
         >>> input ENTER
 
-        ? Select dependency installation type for "sub-package-c" (Use arrow keys)
-        ❯ dependencies
-          devDependencies
+        ❯ ✓ Confirm
+
+        >>> input ENTER
+
+        ? Select installation type for new dependency
+          sub-package-c
+          + promise-react-component 0.0.2
 
         >>> input ENTER
 
@@ -92,13 +96,13 @@ describe("Adding new dependency", async () => {
     );
   });
 
-  describe("non-interactive", () => {
-    it("Adds the dependency via the --dependency flag", async () => {
+  describe("via --dependency flag", () => {
+    it("Correctly adds dependency specified in --dependency flag", async () => {
       // eslint-disable-next-line
       jest.setTimeout(100000);
 
       const projectPath = await generateProject({
-        name: "project-add-dependency-non-interactive",
+        name: "project-add-dependency-with-flag",
         packages: [
           { name: "sub-package-a" },
           {
@@ -124,7 +128,17 @@ describe("Adding new dependency", async () => {
 
         >>> input ENTER
 
-        Select dependency installation type for "sub-package-a"
+        ❯ ✓ Confirm
+
+        >>> input ENTER
+
+        ? Select installation type for new dependency
+          sub-package-a
+          + promise-react-component 0.0.2
+         (Use arrow keys)
+        ❯ dependencies
+          devDependencies
+          peerDependencies
 
         >>> input ENTER
 

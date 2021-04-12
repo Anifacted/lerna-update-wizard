@@ -69,7 +69,13 @@ describe("--dedupe flag", () => {
         >>> input ARROW_DOWN
         >>> input ENTER
 
-        Already installed (0.2.0)
+        ❯ ✓ Confirm
+
+        >>> input ENTER
+
+        sub-package-b:
+          lodash@0.2.0
+          Already installed ✗
 
         >>> input CTRL+C
         `

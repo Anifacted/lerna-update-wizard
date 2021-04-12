@@ -37,13 +37,13 @@ describe("Lazy install dependency", async () => {
 
         >>> wait
 
-        Using version ^0.2.5 ✓
+        ? Confirm or edit installations
 
-        >>> wait
+        >>> input ENTER
 
-        ? Select dependency installation type for "sub-package-a" (Use arrow keys)
-        ❯ dependencies
-          devDependencies
+        ? Select installation type for new dependency
+          sub-package-a
+          + treediff ^0.2.5
 
         >>> input ENTER
 

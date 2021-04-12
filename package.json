@@ -3,7 +3,11 @@
   "bin": {
     "lernaupdate": "./bin/lernaupdate"
   },
-  "version": "0.16.0",
+  "files": [
+    "src",
+    "bin"
+  ],
+  "version": "0.17.8",
   "main": "index.js",
   "license": "MIT",
   "repository": {
@@ -13,30 +17,55 @@
   "dependencies": {
     "chalk": "^2.3.0",
     "execution-time": "^1.2.0",
+    "fs-extra": "^7.0.0",
     "globby": "^8.0.1",
-    "inquirer": "^4.0.1",
-    "inquirer-autocomplete-prompt": "^0.12.1",
+    "inquirer": "^7.0.0",
+    "inquirer-autocomplete-prompt": "^1.0.1",
     "lodash": "^4.17.4",
     "meow": "^4.0.0",
-    "minimist": "^1.2.0",
-    "prettier-package-json": "^2.1.0",
+    "minimist": "^1.2.3",
     "semver-compare": "^1.0.0"
   },
   "devDependencies": {
     "@rauschma/stringio": "^1.4.0",
     "eslint": "^4.14.0",
     "eslint-config-pretty-standard": "^1.1.0",
-    "fs-extra": "^7.0.0",
     "jest": "^23.4.2",
+    "lint-staged": "^9.4.3",
+    "node-publisher": "^1.4.0",
+    "pre-commit": "^1.2.2",
     "prettier": "^1.9.2",
     "sinon": "^6.1.4",
     "unexpected": "^10.38.0",
     "unexpected-sinon": "^10.10.1"
   },
   "scripts": {
-    "test": "jest --verbose --runInBand"
+    "test": "jest --verbose --runInBand",
+    "release": "node-publisher release",
+    "travis": "npm run lint && npm run format && npm run isGitClean && npm test",
+    "isGitClean": "./bin/is_git_clean",
+    "lint": "eslint 'src/**/*.js'",
+    "format": "./node_modules/.bin/prettier --write 'src/**/*.js'",
+    "lint-staged": "lint-staged"
   },
+  "keywords": [
+    "dependency manager",
+    "bulk update",
+    "monorepo",
+    "lerna",
+    "yarn workspaces",
+    "workspace",
+    "dependencies"
+  ],
   "jest": {
     "testURL": "http://localhost"
+  },
+  "pre-commit": "lint-staged",
+  "lint-staged": {
+    "*.js": [
+      "npm run format",
+      "npm run lint",
+      "git add"
+    ]
   }
 }

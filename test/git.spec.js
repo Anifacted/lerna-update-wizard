@@ -3,6 +3,7 @@ const generateProject = require("./utils/generateProject");
 const expect = require("unexpected");
 const util = require("util");
 const exec = util.promisify(require("child_process").exec);
+const chalk = require("chalk");
 
 expect.addAssertion(
   "<string> when run <assertion>",
@@ -50,6 +51,10 @@ describe("Git features", async () => {
         >>> input ARROW_UP
         >>> input ENTER
 
+        ? Confirm or edit installations
+
+        >>> input ENTER
+
         ? Do you want to create a new git branch for the change? (Y/n)
 
         >>> input ENTER
@@ -63,7 +68,7 @@ describe("Git features", async () => {
 
         >>> input ENTER
 
-        ? Enter a git commit message: (Upgrade dependency: lodash@0.1.0)
+        ? Enter a git commit message: (Update dependency: lodash@0.1.0)
 
         >>> input ENTER
 
@@ -82,14 +87,14 @@ describe("Git features", async () => {
       `cd ${projectPath} && git log | sed '5q;d'`,
       "when run",
       "to equal",
-      "Upgrade dependency: lodash@0.1.0"
+      "Update dependency: lodash@0.1.0"
     );
 
     await expect(
-      `cd ${projectPath} && git log | sed '7q;d'`,
+      `cd ${projectPath} && git log | sed '8q;d'`,
       "when run",
       "to equal",
-      "* sub-package-d: 0.2.0 →  0.1.0"
+      "* sub-package-d: 0.2.0 → 0.1.0"
     );
   });
 });
