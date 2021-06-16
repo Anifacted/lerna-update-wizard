@@ -7,6 +7,7 @@ const invariant = require("./utils/invariant");
 const inquirer = require("inquirer");
 const runCommand = require("./utils/runCommand");
 const lines = require("./utils/lines");
+const merge = require("lodash/merge");
 
 let jobs = [];
 
@@ -249,7 +250,12 @@ const createJobWizard = async ({
 const composeJobsWizard = async context => {
   const create = async () => {
     try {
-      jobs = [...jobs, await createJobWizard(context)];
+      const jobsFromFlags = Array.isArray(context.flags.dependency)
+        ? context.flags.dependency.map(dependency =>
+            createJobWizard(merge({}, context, { flags: { dependency } }))
+          )
+        : [createJobWizard(context)];
+      jobs = [...jobs, ...(await Promise.all(jobsFromFlags))];
       await composeJobsWizard(context);
     } catch (e) {
       if (context.flags.nonInteractive) {
