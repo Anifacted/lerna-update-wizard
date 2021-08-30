@@ -42,7 +42,7 @@
   "scripts": {
     "test": "jest --verbose --runInBand",
     "release": "node-publisher release",
-    "travis": "npm run lint && npm run format && npm run isGitClean && npm test",
+    "CI": "npm run lint && npm run format && npm run isGitClean && npm test",
     "isGitClean": "./bin/is_git_clean",
     "lint": "eslint 'src/**/*.js'",
     "format": "./node_modules/.bin/prettier --write 'src/**/*.js'",
