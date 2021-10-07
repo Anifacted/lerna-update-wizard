@@ -29,8 +29,58 @@ describe("lerna.json `packages` configuration", () => {
     });
   });
 
-  describe("but given a package.json `packages` configuration", () => {
-    it("uses the package.json `packages` configuration", async () => {
+  describe("but given a package.json `workspaces` configuration", () => {
+    it("uses the package.json `workspaces` configuration", async () => {
+      // eslint-disable-next-line
+      jest.setTimeout(100000);
+
+      const projectPath = await generateProject({
+        ...projectConfig,
+        workspaces: ["fooPackages/*"],
+        packages: [
+          {
+            name: "sub-package-myPackages",
+            dependencies: { lodash: "0.1.0" },
+            moduleDirName: "fooPackages",
+          },
+        ],
+      });
+
+      await runProgram(
+        projectPath,
+        `
+        ❯ lodash (1 version)
+
+        >>> input ENTER
+
+        ❯◉ sub-package-myPackages (0.1.0)
+
+        >>> input ENTER
+
+        ? Select version to install:
+
+        >>> input ENTER
+
+        ? Confirm or edit installations
+
+        >>> input ENTER
+
+        ? It looks like you are using Yarn Workspaces!
+         A single install at the end is recommended to save time.
+         Note: You can enable this automatically using the --lazy flag
+        (Use arrow keys)
+       ❯ Run single-install (lazy)
+         Run individual installs (exhaustive)
+
+         >>> input ENTER
+
+         >>> input CTRL+C`
+      );
+    });
+  });
+
+  describe("but given a package.json `workspaces.packages` configuration", () => {
+    it("uses the package.json `workspaces.packages` configuration", async () => {
       // eslint-disable-next-line
       jest.setTimeout(100000);
 
