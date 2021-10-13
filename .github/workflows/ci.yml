@@ -14,7 +14,8 @@ jobs:
       with:
         node-version: 14.x
     - run: npm install
-    - run: npm run lint
+    - name: Lint
+      run: npm run lint
       env:
         CI: true
 
@@ -33,7 +34,8 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
     - run: npm install
-    - run: |
+    - name: Test
+      run: |
         git config --global init.defaultBranch master
         git config --global user.name ${GITHUB_ACTOR}
         git config --global user.email `git show -s --format='%ae'`
