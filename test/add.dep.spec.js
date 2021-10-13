@@ -4,7 +4,7 @@ const fileExists = require("../src/utils/fileExists");
 const { resolve } = require("path");
 const expect = require("unexpected");
 
-describe("Adding new dependency", async () => {
+describe("Adding new dependency", () => {
   it("correctly installs a new version", async () => {
     // eslint-disable-next-line
     jest.setTimeout(100000);

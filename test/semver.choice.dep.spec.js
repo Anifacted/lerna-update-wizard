@@ -3,7 +3,7 @@ const generateProject = require("./utils/generateProject");
 const { resolve } = require("path");
 const expect = require("unexpected");
 
-describe("Setting semver prefix for dependency", async () => {
+describe("Setting semver prefix for dependency", () => {
   it("correctly toggles through prefixes using left/right arrow keys", async () => {
     // eslint-disable-next-line
     jest.setTimeout(100000);

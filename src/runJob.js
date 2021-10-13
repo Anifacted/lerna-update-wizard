@@ -24,7 +24,7 @@ const runJob = async (job, context) => {
 
   ui.log.write("\n");
 
-  for (let targetPackageName of targetPackages) {
+  for (const targetPackageName of targetPackages) {
     const sources = [];
     const existingDependency = dependencyMap[targetDependency];
     if (existingDependency && existingDependency.packs[targetPackageName]) {

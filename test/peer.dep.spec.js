@@ -3,7 +3,7 @@ const expect = require("unexpected");
 const { default: runProgram } = require("./utils/runProgram");
 const generateProject = require("./utils/generateProject");
 
-describe("Peer dependency", async () => {
+describe("Peer dependency", () => {
   it("updates and installs peer dependencies", async () => {
     // eslint-disable-next-line
     jest.setTimeout(100000);
