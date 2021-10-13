@@ -66,5 +66,8 @@
       "npm run lint",
       "git add"
     ]
+  },
+  "engines": {
+    "node": ">=12"
   }
 }
