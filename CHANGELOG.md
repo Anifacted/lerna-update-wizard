@@ -1,3 +1,17 @@
+### v1.0.1 (2021-10-14)
+
+#### Pull requests
+
+- [#109](https://github.com/Anifacted/lerna-update-wizard/pull/109) Bump lint-staged from 9.4.3 to 11.2.3 ([dependabot[bot]](mailto:49699333+dependabot[bot]@users.noreply.github.com))
+- [#107](https://github.com/Anifacted/lerna-update-wizard/pull/107) Bump jest from 23.6.0 to 27.2.5 ([Marc Høegh](mailto:mhoegh90@gmail.com), [dependabot[bot]](mailto:49699333+dependabot[bot]@users.noreply.github.com))
+- [#110](https://github.com/Anifacted/lerna-update-wizard/pull/110) Upgrade Meow ([Sune Simonsen](mailto:sune@we-knowhow.dk))
+- [#108](https://github.com/Anifacted/lerna-update-wizard/pull/108) Bump chalk from 2.4.2 to 4.1.2 ([dependabot[bot]](mailto:49699333+dependabot[bot]@users.noreply.github.com))
+
+#### Commits to master
+
+- [Increase jest.setTimeout on slow spec](https://github.com/Anifacted/lerna-update-wizard/commit/220c0afa3ec88b0cbb6a498f2397492f94822534) ([Marc Høegh](mailto:mhoegh90@gmail.com))
+- [Update changelog](https://github.com/Anifacted/lerna-update-wizard/commit/868e0807fdb17661446345ff3d7ad0fafad9857a) ([Marc Høegh](mailto:mhoegh90@gmail.com))
+
 ### v1.0.0 (2021-10-14)
 
 #### Pull requests
