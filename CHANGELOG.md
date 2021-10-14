@@ -1,3 +1,26 @@
+### v1.0.0 (2021-10-14)
+
+#### Pull requests
+
+- [#104](https://github.com/Anifacted/lerna-update-wizard/pull/104) Update packages using npm audit ([Sune Simonsen](mailto:sune@we-knowhow.dk))
+- [#103](https://github.com/Anifacted/lerna-update-wizard/pull/103) Set the minimum Node version to v12 \(Major\) ([Sune Simonsen](mailto:sune@we-knowhow.dk))
+- [#101](https://github.com/Anifacted/lerna-update-wizard/pull/101) Bump ws from 5.2.2 to 5.2.3 ([dependabot[bot]](mailto:49699333+dependabot[bot]@users.noreply.github.com))
+- [#102](https://github.com/Anifacted/lerna-update-wizard/pull/102) Give the Github actions step names ([Sune Simonsen](mailto:sune@we-knowhow.dk))
+- [#85](https://github.com/Anifacted/lerna-update-wizard/pull/85) Bump ini from 1.3.5 to 1.3.8 ([dependabot[bot]](mailto:49699333+dependabot[bot]@users.noreply.github.com))
+- [#89](https://github.com/Anifacted/lerna-update-wizard/pull/89) Bump handlebars from 4.5.2 to 4.7.7 ([dependabot[bot]](mailto:49699333+dependabot[bot]@users.noreply.github.com))
+- [#90](https://github.com/Anifacted/lerna-update-wizard/pull/90) Bump lodash from 4.17.15 to 4.17.21 ([dependabot[bot]](mailto:49699333+dependabot[bot]@users.noreply.github.com))
+- [#91](https://github.com/Anifacted/lerna-update-wizard/pull/91) Bump hosted-git-info from 2.8.5 to 2.8.9 ([dependabot[bot]](mailto:49699333+dependabot[bot]@users.noreply.github.com))
+- [#87](https://github.com/Anifacted/lerna-update-wizard/pull/87) Bump y18n from 3.2.1 to 3.2.2 ([dependabot[bot]](mailto:49699333+dependabot[bot]@users.noreply.github.com))
+- [#94](https://github.com/Anifacted/lerna-update-wizard/pull/94) Bump path-parse from 1.0.6 to 1.0.7 ([dependabot[bot]](mailto:49699333+dependabot[bot]@users.noreply.github.com))
+- [#96](https://github.com/Anifacted/lerna-update-wizard/pull/96) Bump tar from 4.4.8 to 4.4.19 ([dependabot[bot]](mailto:49699333+dependabot[bot]@users.noreply.github.com))
+- [#98](https://github.com/Anifacted/lerna-update-wizard/pull/98) Bump tmpl from 1.0.4 to 1.0.5 ([dependabot[bot]](mailto:49699333+dependabot[bot]@users.noreply.github.com))
+- [#100](https://github.com/Anifacted/lerna-update-wizard/pull/100) Switch from Travis to GitHub Actions ([Sune Simonsen](mailto:sune@we-knowhow.dk))
+
+#### Commits to master
+
+- [Update .nvmrc -&gt; 14.16.0](https://github.com/Anifacted/lerna-update-wizard/commit/ee42544a4a9d25dad290271e4b636f231469b422) ([Marc Høegh](mailto:mhoegh90@gmail.com))
+- [Update changelog](https://github.com/Anifacted/lerna-update-wizard/commit/a347e829519485f7b893e77272ea29a31f9838d9) ([Marc Høegh](mailto:mhoegh90@gmail.com))
+
 ### v0.17.8 (2020-04-06)
 
 #### Pull requests
@@ -131,7 +154,7 @@
 
 ### v0.11.0 (2018-12-03)
 
-- [#31](https://github.com/Anifacted/lerna-update-wizard/pull/31) Add non-interactive features  ([Marc Høegh](mailto:mhoegh90@gmail.com))
+- [#31](https://github.com/Anifacted/lerna-update-wizard/pull/31) Add non-interactive features ([Marc Høegh](mailto:mhoegh90@gmail.com))
 - [#30](https://github.com/Anifacted/lerna-update-wizard/pull/30) Add tests covering git features ([Marc Høegh](mailto:mhoegh90@gmail.com))
 
 ### v0.10.0 (2018-11-30)
@@ -270,4 +293,3 @@
 - [Make executable](https://github.com/Anifacted/lerna-update-wizard/commit/ed86dcc6719ca7fbd7b821d014057d722148c83a) ([Marc Høegh](mailto:mhoegh90@gmail.com))
 - [Add .gitignore](https://github.com/Anifacted/lerna-update-wizard/commit/960132fefb13833d1fb3fe871d29cb5affbe9bac) ([Marc Høegh](mailto:mhoegh90@gmail.com))
 - [Initial commit](https://github.com/Anifacted/lerna-update-wizard/commit/0bd5d3904f0f63d03855d989cfb7bafbdd23440c) ([Marc Høegh](mailto:mhoegh90@gmail.com))
-
