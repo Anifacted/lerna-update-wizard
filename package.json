@@ -32,7 +32,7 @@
     "eslint-config-pretty-standard": "^1.1.0",
     "jest": "^23.4.2",
     "lint-staged": "^9.4.3",
-    "node-publisher": "^1.4.0",
+    "node-publisher": "^1.5.2",
     "pre-commit": "^1.2.2",
     "prettier": "^1.9.2",
     "sinon": "^6.1.4",
