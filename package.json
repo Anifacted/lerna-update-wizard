@@ -36,7 +36,7 @@
     "eslint-plugin-mocha": "^9.0.0",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^5.1.0",
-    "jest": "^26.6.3",
+    "jest": "^27.2.5",
     "lint-staged": "^9.4.3",
     "node-publisher": "^2.0.0",
     "pre-commit": "^1.2.2",
@@ -63,7 +63,8 @@
     "dependencies"
   ],
   "jest": {
-    "testURL": "http://localhost"
+    "testURL": "http://localhost",
+    "testTimeout": 10000
   },
   "pre-commit": "lint-staged",
   "lint-staged": {

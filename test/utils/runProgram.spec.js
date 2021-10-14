@@ -6,7 +6,7 @@ const sinon = require("sinon");
 const expect = unexpected.clone().use(unexpectedSinon);
 
 const runWithMock = instruction => {
-  let handlers = {
+  const handlers = {
     data: [],
     end: [],
   };

@@ -1,13 +1,12 @@
 const { default: runProgram } = require("./utils/runProgram");
 const generateProject = require("./utils/generateProject");
 
+let projectPath;
+
 describe("Update dependency", () => {
   describe("dep already is installed in all selected packages", () => {
-    it("updates", async () => {
-      // eslint-disable-next-line
-      jest.setTimeout(100000);
-
-      const projectPath = await generateProject({
+    beforeEach(async () => {
+      projectPath = await generateProject({
         name: "project-a",
         packages: [
           { name: "sub-package-a" },
@@ -19,7 +18,9 @@ describe("Update dependency", () => {
           { name: "sub-package-d", dependencies: { lodash: "0.2.0" } },
         ],
       });
+    });
 
+    it("updates", async () => {
       await runProgram(
         projectPath,
         `
@@ -84,11 +85,8 @@ describe("Update dependency", () => {
   });
 
   describe("dep is new to one of the selected packages", () => {
-    it("prompts user about install-type and installs/updates", async () => {
-      // eslint-disable-next-line
-      jest.setTimeout(100000);
-
-      const projectPath = await generateProject({
+    beforeEach(async () => {
+      projectPath = await generateProject({
         name: "project-b",
         packages: [
           { name: "sub-package-a" },
@@ -100,7 +98,9 @@ describe("Update dependency", () => {
           { name: "sub-package-d", dependencies: { lodash: "0.2.0" } },
         ],
       });
+    });
 
+    it("prompts user about install-type and installs/updates", async () => {
       await runProgram(
         projectPath,
         `

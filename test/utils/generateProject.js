@@ -55,7 +55,7 @@ const generateProject = async (options, log) => {
   }
 
   if (packages) {
-    for (let pOptions of packages) {
+    for (const pOptions of packages) {
       await generateProject(
         {
           ...pOptions,
