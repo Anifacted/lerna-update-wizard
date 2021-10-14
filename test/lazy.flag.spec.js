@@ -1,7 +1,7 @@
 const { default: runProgram } = require("./utils/runProgram");
 const generateProject = require("./utils/generateProject");
 
-describe("Lazy install dependency", async () => {
+describe("Lazy install dependency", () => {
   describe("dep is not installed in any of the packages", () => {
     it("lazily installs the dependency", async () => {
       // eslint-disable-next-line

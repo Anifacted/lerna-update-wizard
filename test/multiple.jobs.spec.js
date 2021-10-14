@@ -3,7 +3,7 @@ const generateProject = require("./utils/generateProject");
 const { resolve } = require("path");
 const expect = require("unexpected");
 
-describe("Multiple installation jobs", async () => {
+describe("Multiple installation jobs", () => {
   it("correctly adds in one job and updates in another", async () => {
     // eslint-disable-next-line
     jest.setTimeout(100000);

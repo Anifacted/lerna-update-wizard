@@ -1,7 +1,7 @@
 const { default: runProgram } = require("./utils/runProgram");
 const generateProject = require("./utils/generateProject");
 
-describe("Update dependency", async () => {
+describe("Update dependency", () => {
   describe("dep already is installed in all selected packages", () => {
     it("updates", async () => {
       // eslint-disable-next-line

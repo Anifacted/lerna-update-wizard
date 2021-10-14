@@ -1,21 +1,22 @@
 const { default: runProgram } = require("./utils/runProgram");
 const generateProject = require("./utils/generateProject");
-const expect = require("unexpected");
+const unexpected = require("unexpected");
 const util = require("util");
 const exec = util.promisify(require("child_process").exec);
-const chalk = require("chalk");
 
-expect.addAssertion(
-  "<string> when run <assertion>",
-  async (expect, cmd, assertion, compare) => {
-    const result = await exec(cmd);
-    return result.stderr
-      ? expect.fail(new Error(`Command errored: ${result.sdterr}`))
-      : expect(result.stdout.trim(), assertion, compare);
-  }
-);
+const expect = unexpected
+  .clone()
+  .addAssertion(
+    "<string> when run <assertion>",
+    async (expect, cmd, assertion, compare) => {
+      const result = await exec(cmd);
+      return result.stderr
+        ? expect.fail(new Error(`Command errored: ${result.sdterr}`))
+        : expect(result.stdout.trim(), assertion, compare);
+    }
+  );
 
-describe("Git features", async () => {
+describe("Git features", () => {
   it("correctly adds git commit and branch", async () => {
     // eslint-disable-next-line
     jest.setTimeout(100000);
