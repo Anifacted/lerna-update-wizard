@@ -15,7 +15,7 @@
     "url": "https://github.com/Anifacted/lerna-update-wizard"
   },
   "dependencies": {
-    "chalk": "^2.3.0",
+    "chalk": "^4.1.2",
     "cli-cursor": "^2.1.0",
     "execution-time": "^1.2.0",
     "fs-extra": "^7.0.0",
