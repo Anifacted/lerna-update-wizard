@@ -3,17 +3,18 @@ const generateProject = require("./utils/generateProject");
 const { resolve } = require("path");
 const expect = require("unexpected");
 
-describe("Noninteractive mode", () => {
-  // eslint-disable-next-line
-  jest.setTimeout(100000);
+let projectPath;
 
+describe("Noninteractive mode", () => {
   describe("when given no flags", () => {
-    it("should complain about missing dependency flag", async () => {
-      const projectPath = await generateProject({
+    beforeEach(async () => {
+      projectPath = await generateProject({
         name: "project-noninteractive-1",
         packages: [{ name: "sub-package" }],
       });
+    });
 
+    it("should complain about missing dependency flag", async () => {
       await runProgram(
         projectPath,
         `An error occurred:
@@ -24,7 +25,6 @@ describe("Noninteractive mode", () => {
   });
 
   describe("when adding new dependency", () => {
-    let projectPath;
     beforeEach(async () => {
       projectPath = await generateProject({
         name: "project-noninteractive-adding",
@@ -84,8 +84,8 @@ describe("Noninteractive mode", () => {
   });
 
   describe("when updating existing dependency", () => {
-    it("should install package", async () => {
-      const projectPath = await generateProject({
+    beforeEach(async () => {
+      projectPath = await generateProject({
         name: "project-noninteractive-updating",
         packages: [
           {
@@ -96,7 +96,9 @@ describe("Noninteractive mode", () => {
           },
         ],
       });
+    });
 
+    it("should install package", async () => {
       await runProgram(projectPath, `Installed 1 packages in`, {
         flags: "--non-interactive --dependency lodash@0.2.1",
       });
@@ -113,8 +115,8 @@ describe("Noninteractive mode", () => {
   });
 
   describe("when updating existing scoped dependency", () => {
-    it("should install package", async () => {
-      const projectPath = await generateProject({
+    beforeEach(async () => {
+      projectPath = await generateProject({
         name: "project-noninteractive-updating-scoped-dependency",
         packages: [
           {
@@ -125,7 +127,9 @@ describe("Noninteractive mode", () => {
           },
         ],
       });
+    });
 
+    it("should install package", async () => {
       await runProgram(projectPath, `Installed 1 packages in`, {
         flags: "--non-interactive --dependency @ngrx/entity@7.0.0",
       });

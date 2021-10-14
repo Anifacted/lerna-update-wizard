@@ -86,7 +86,7 @@ const scan = options => {
 
     if (matchInfo) {
       fulfilled = true;
-      buffer = ""; //Reset buffer (feed() can still fill the buffer)
+      buffer = ""; // Reset buffer (feed() can still fill the buffer)
 
       clearTimeout(timeoutId);
       onFind(matchInfo);

@@ -3,11 +3,13 @@ const generateProject = require("./utils/generateProject");
 const { resolve } = require("path");
 const expect = require("unexpected");
 
-describe("Multiple installation jobs", async () => {
-  it("correctly adds in one job and updates in another", async () => {
-    // eslint-disable-next-line
-    jest.setTimeout(100000);
-    const projectPath = await generateProject({
+let projectPath;
+
+jest.setTimeout(25000);
+
+describe("Multiple installation jobs", () => {
+  beforeEach(async () => {
+    projectPath = await generateProject({
       name: "multijob-project",
       packages: [
         { name: "my-app" },
@@ -18,7 +20,9 @@ describe("Multiple installation jobs", async () => {
         { name: "my-helpers", dependencies: { lodash: "0.1.0" } },
       ],
     });
+  });
 
+  it("correctly adds in one job and updates in another", async () => {
     await runProgram(
       projectPath,
       `

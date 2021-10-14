@@ -1,3 +1,22 @@
 {
-  "extends": ["pretty-standard"]
+  "extends": ["standard", "prettier"],
+  "plugins": ["mocha"],
+  "env": {
+    "mocha": true,
+  },
+  "rules": {
+    "import/no-extraneous-dependencies": [
+      "error",
+      {
+        "devDependencies": [
+          "**/*.spec.js",
+        ],
+        "optionalDependencies": false,
+        "peerDependencies": true
+      }
+    ],
+    "mocha/no-exclusive-tests": "error",
+    "mocha/no-nested-tests": "error",
+    "mocha/no-identical-title": "error"
+  }
 }

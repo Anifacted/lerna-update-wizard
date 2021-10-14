@@ -87,11 +87,6 @@ const run = (proc, { type, value, maxWait = 10 }, onStdOut) =>
         resolve(proc);
         break;
     }
-
-    proc.stdout.on("end", async () => {
-      await delay(maxWait * 1000);
-      resolve();
-    });
   });
 
 module.exports.run = run;
@@ -125,12 +120,22 @@ module.exports.default = (
   `);
 
   const onStdOut = content => {
+    if (proc.killed) return;
+
     log && console.info(chalk.red(content));
     fs.appendFileSync(logFilePath, content);
   };
 
-  return sequences.reduce(
-    (prev, config, index) => prev.then(proc => run(proc, config, onStdOut)),
-    run(proc, initial, onStdOut)
-  );
+  return sequences
+    .reduce(
+      (prev, config, index) => prev.then(proc => run(proc, config, onStdOut)),
+      run(proc, initial, onStdOut)
+    )
+    .then(() => {
+      proc.kill();
+    })
+    .catch(err => {
+      proc.kill();
+      throw err;
+    });
 };

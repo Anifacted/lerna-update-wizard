@@ -1,25 +1,26 @@
 const { default: runProgram } = require("./utils/runProgram");
 const generateProject = require("./utils/generateProject");
-const expect = require("unexpected");
+const unexpected = require("unexpected");
 const util = require("util");
 const exec = util.promisify(require("child_process").exec);
-const chalk = require("chalk");
 
-expect.addAssertion(
-  "<string> when run <assertion>",
-  async (expect, cmd, assertion, compare) => {
-    const result = await exec(cmd);
-    return result.stderr
-      ? expect.fail(new Error(`Command errored: ${result.sdterr}`))
-      : expect(result.stdout.trim(), assertion, compare);
-  }
-);
+let projectPath;
 
-describe("Git features", async () => {
-  it("correctly adds git commit and branch", async () => {
-    // eslint-disable-next-line
-    jest.setTimeout(100000);
-    const projectPath = await generateProject({
+const expect = unexpected
+  .clone()
+  .addAssertion(
+    "<string> when run <assertion>",
+    async (expect, cmd, assertion, compare) => {
+      const result = await exec(cmd);
+      return result.stderr
+        ? expect.fail(new Error(`Command errored: ${result.sdterr}`))
+        : expect(result.stdout.trim(), assertion, compare);
+    }
+  );
+
+describe("Git features", () => {
+  beforeAll(async () => {
+    projectPath = await generateProject({
       name: "project-a",
       git: true,
       packages: [
@@ -32,7 +33,9 @@ describe("Git features", async () => {
         { name: "sub-package-d", dependencies: { lodash: "0.2.0" } },
       ],
     });
+  });
 
+  it("correctly adds git commit and branch", async () => {
     await runProgram(
       projectPath,
       `

@@ -243,7 +243,7 @@ module.exports = async ({ input, flags }) => {
   let totalInstalls = 0;
 
   // Install process
-  for (let job of jobs) {
+  for (const job of jobs) {
     totalInstalls += await runJob(job, context);
   }
 

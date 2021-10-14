@@ -14,14 +14,15 @@ const projectConfig = {
   ],
 };
 
+let projectPath;
+
 describe("lerna.json `packages` configuration", () => {
   describe("when given no lerna.json", () => {
+    beforeEach(async () => {
+      projectPath = await generateProject(projectConfig);
+    });
+
     it("cannot find any packages for the project", async () => {
-      // eslint-disable-next-line
-      jest.setTimeout(100000);
-
-      const projectPath = await generateProject(projectConfig);
-
       await runProgram(
         projectPath,
         "Error: No packages found. Please specify via:"
@@ -30,11 +31,8 @@ describe("lerna.json `packages` configuration", () => {
   });
 
   describe("but given a package.json `workspaces` configuration", () => {
-    it("uses the package.json `workspaces` configuration", async () => {
-      // eslint-disable-next-line
-      jest.setTimeout(100000);
-
-      const projectPath = await generateProject({
+    beforeEach(async () => {
+      projectPath = await generateProject({
         ...projectConfig,
         workspaces: ["fooPackages/*"],
         packages: [
@@ -45,7 +43,9 @@ describe("lerna.json `packages` configuration", () => {
           },
         ],
       });
+    });
 
+    it("uses the package.json `workspaces` configuration", async () => {
       await runProgram(
         projectPath,
         `
@@ -79,12 +79,9 @@ describe("lerna.json `packages` configuration", () => {
     });
   });
 
-  describe("but given a package.json `workspaces.packages` configuration", () => {
-    it("uses the package.json `workspaces.packages` configuration", async () => {
-      // eslint-disable-next-line
-      jest.setTimeout(100000);
-
-      const projectPath = await generateProject({
+  describe("but given a package.json `packages` configuration", () => {
+    beforeEach(async () => {
+      projectPath = await generateProject({
         ...projectConfig,
         workspaces: { packages: ["fooPackages/*"] },
         packages: [
@@ -95,7 +92,9 @@ describe("lerna.json `packages` configuration", () => {
           },
         ],
       });
+    });
 
+    it("uses the package.json `packages` configuration", async () => {
       await runProgram(
         projectPath,
         `
@@ -130,17 +129,16 @@ describe("lerna.json `packages` configuration", () => {
   });
 
   describe("when given a single non-standard packages location", () => {
-    it("reads and installs correctly from/to that directory", async () => {
-      // eslint-disable-next-line
-      jest.setTimeout(100000);
-
-      const projectPath = await generateProject({
+    beforeEach(async () => {
+      projectPath = await generateProject({
         ...projectConfig,
         lernaJson: {
           packages: ["myPackages/*"],
         },
       });
+    });
 
+    it("reads and installs correctly from/to that directory", async () => {
       await runProgram(
         projectPath,
         `
@@ -179,11 +177,8 @@ describe("lerna.json `packages` configuration", () => {
   });
 
   describe("when given 3 different `packages` locations", () => {
-    it("reads and installs correctly from/to that directory", async () => {
-      // eslint-disable-next-line
-      jest.setTimeout(100000);
-
-      const projectPath = await generateProject({
+    beforeEach(async () => {
+      projectPath = await generateProject({
         name: "project-multi-packages-dir",
         packages: [
           {
@@ -205,7 +200,9 @@ describe("lerna.json `packages` configuration", () => {
           packages: ["packages/*", "myPackages/*", "foo/bar/baz/*"],
         },
       });
+    });
 
+    it("reads and installs correctly from/to that directory", async () => {
       await runProgram(
         projectPath,
         `
