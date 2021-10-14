@@ -1,3 +1,14 @@
+### v1.1.0 (2021-10-14)
+
+#### Pull requests
+
+- [#112](https://github.com/Anifacted/lerna-update-wizard/pull/112) Upgrade globby@v11 ([Marc Høegh](mailto:mhoegh90@gmail.com))
+- [#99](https://github.com/Anifacted/lerna-update-wizard/pull/99) Support official `npm` workspaces config ([Herbert Treis Neto](mailto:htnetooo@gmail.com), [Marc Høegh](mailto:Anifacted@users.noreply.github.com))
+
+#### Commits to master
+
+- [Update changelog](https://github.com/Anifacted/lerna-update-wizard/commit/197236568b361de4c5916f6a551701c87aa0f486) ([Marc Høegh](mailto:mhoegh90@gmail.com))
+
 ### v1.0.1 (2021-10-14)
 
 #### Pull requests
