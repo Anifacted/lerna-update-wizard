@@ -5,7 +5,7 @@ const expect = require("unexpected");
 
 let projectPath;
 
-jest.setTimeout(20000);
+jest.setTimeout(25000);
 
 describe("Multiple installation jobs", () => {
   beforeEach(async () => {
