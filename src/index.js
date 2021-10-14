@@ -49,7 +49,13 @@ module.exports = async ({ input, flags }) => {
 
   const { name: projectName, workspaces } = require(projectPackageJsonPath);
 
-  // Attempt to get `packages` config from project package.json
+  // Attempt to get `workspaces` config from project package.json
+  if (Array.isArray(workspaces)) {
+    packagesConfig = workspaces;
+    ui.logBottom("Found `workspaces` config in `package.json['workspaces']`");
+  }
+
+  // Attempt to get `workspaces.packages` config from project package.json
   if (workspaces && Array.isArray(workspaces.packages)) {
     packagesConfig = workspaces.packages;
     ui.logBottom(
