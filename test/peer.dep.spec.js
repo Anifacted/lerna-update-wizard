@@ -3,12 +3,11 @@ const expect = require("unexpected");
 const { default: runProgram } = require("./utils/runProgram");
 const generateProject = require("./utils/generateProject");
 
-describe("Peer dependency", () => {
-  it("updates and installs peer dependencies", async () => {
-    // eslint-disable-next-line
-    jest.setTimeout(100000);
+let projectPath;
 
-    const projectPath = await generateProject({
+describe("Peer dependency", () => {
+  beforeEach(async () => {
+    projectPath = await generateProject({
       name: "project-a",
       packages: [
         { name: "sub-package-a" },
@@ -20,7 +19,9 @@ describe("Peer dependency", () => {
         { name: "sub-package-c", dependencies: { lodash: "0.2.0" } },
       ],
     });
+  });
 
+  it("updates and installs peer dependencies", async () => {
     await runProgram(
       projectPath,
       `

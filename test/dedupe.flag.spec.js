@@ -3,27 +3,26 @@ const generateProject = require("./utils/generateProject");
 const expect = require("unexpected");
 const { resolve } = require("path");
 
-const projectConfig = {
-  name: "project-dedupe-flag",
-  packages: [
-    {
-      name: "sub-package-a",
-      dependencies: { lodash: "0.1.0" },
-    },
-    {
-      name: "sub-package-b",
-      dependencies: { lodash: "0.2.0", treediff: "0.1.0" },
-    },
-  ],
-};
+let projectPath;
 
 describe("--dedupe flag", () => {
+  beforeAll(async () => {
+    projectPath = await generateProject({
+      name: "project-dedupe-flag",
+      packages: [
+        {
+          name: "sub-package-a",
+          dependencies: { lodash: "0.1.0" },
+        },
+        {
+          name: "sub-package-b",
+          dependencies: { lodash: "0.2.0", treediff: "0.1.0" },
+        },
+      ],
+    });
+  });
+
   it("filters out dependencies with less than different 2 versions installed", async () => {
-    // eslint-disable-next-line
-    jest.setTimeout(100000);
-
-    const projectPath = await generateProject(projectConfig);
-
     await runProgram(
       `${projectPath} --dedupe`,
       `
@@ -41,11 +40,6 @@ describe("--dedupe flag", () => {
   });
 
   it("deduplicates dependency version by installing the highest installed version", async () => {
-    // eslint-disable-next-line
-    jest.setTimeout(100000);
-
-    const projectPath = await generateProject(projectConfig);
-
     await runProgram(
       `${projectPath} --dedupe`,
       `

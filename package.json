@@ -63,7 +63,8 @@
     "dependencies"
   ],
   "jest": {
-    "testURL": "http://localhost"
+    "testURL": "http://localhost",
+    "testTimeout": 10000
   },
   "pre-commit": "lint-staged",
   "lint-staged": {

@@ -1,13 +1,12 @@
 const { default: runProgram } = require("./utils/runProgram");
 const generateProject = require("./utils/generateProject");
 
+let projectPath;
+
 describe("Lazy install dependency", () => {
   describe("dep is not installed in any of the packages", () => {
-    it("lazily installs the dependency", async () => {
-      // eslint-disable-next-line
-      jest.setTimeout(100000);
-
-      const projectPath = await generateProject({
+    beforeEach(async () => {
+      projectPath = await generateProject({
         name: "project-a",
         packages: [
           { name: "sub-package-a" },
@@ -17,7 +16,8 @@ describe("Lazy install dependency", () => {
           },
         ],
       });
-
+    });
+    it("lazily installs the dependency", async () => {
       await runProgram(
         `${projectPath} --lazy --dependency "treediff@latest"`,
         `

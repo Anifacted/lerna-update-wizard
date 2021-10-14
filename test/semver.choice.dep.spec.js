@@ -3,11 +3,11 @@ const generateProject = require("./utils/generateProject");
 const { resolve } = require("path");
 const expect = require("unexpected");
 
+let projectPath;
+
 describe("Setting semver prefix for dependency", () => {
-  it("correctly toggles through prefixes using left/right arrow keys", async () => {
-    // eslint-disable-next-line
-    jest.setTimeout(100000);
-    const projectPath = await generateProject({
+  beforeEach(async () => {
+    projectPath = await generateProject({
       name: "project-a",
       packages: [
         { name: "sub-package-a" },
@@ -19,7 +19,9 @@ describe("Setting semver prefix for dependency", () => {
         { name: "sub-package-d", dependencies: { lodash: "~0.2.0" } },
       ],
     });
+  });
 
+  it("correctly toggles through prefixes using left/right arrow keys", async () => {
     await runProgram(
       projectPath,
       `

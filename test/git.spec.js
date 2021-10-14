@@ -4,6 +4,8 @@ const unexpected = require("unexpected");
 const util = require("util");
 const exec = util.promisify(require("child_process").exec);
 
+let projectPath;
+
 const expect = unexpected
   .clone()
   .addAssertion(
@@ -17,10 +19,8 @@ const expect = unexpected
   );
 
 describe("Git features", () => {
-  it("correctly adds git commit and branch", async () => {
-    // eslint-disable-next-line
-    jest.setTimeout(100000);
-    const projectPath = await generateProject({
+  beforeAll(async () => {
+    projectPath = await generateProject({
       name: "project-a",
       git: true,
       packages: [
@@ -33,7 +33,9 @@ describe("Git features", () => {
         { name: "sub-package-d", dependencies: { lodash: "0.2.0" } },
       ],
     });
+  });
 
+  it("correctly adds git commit and branch", async () => {
     await runProgram(
       projectPath,
       `
