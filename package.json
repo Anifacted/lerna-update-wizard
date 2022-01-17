@@ -19,7 +19,7 @@
     "cli-cursor": "^2.1.0",
     "execution-time": "^1.4.1",
     "fs-extra": "^7.0.0",
-    "globby": "^11.0.4",
+    "globby": "^12.1.0",
     "inquirer": "^7.0.0",
     "inquirer-autocomplete-prompt": "^1.4.0",
     "lodash": "^4.17.21",
