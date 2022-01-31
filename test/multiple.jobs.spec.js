@@ -192,9 +192,11 @@ describe("Multiple installation jobs", () => {
       require(resolve(projectPath, "packages", "my-app", "package.json")),
       "to satisfy",
       {
-        dependencies: { "promise-react-component": "0.0.2", treediff: "0.0.2" },
+        dependencies: {
+          "promise-react-component": "^0.0.2",
+          treediff: "^0.0.2",
+        },
         devDependencies: { lodash: "^0.2.1" },
-        peerDependencies: expect.it("to be empty"),
       }
     );
 
@@ -203,8 +205,6 @@ describe("Multiple installation jobs", () => {
       "to satisfy",
       {
         dependencies: { lodash: "^0.2.1" },
-        devDependencies: expect.it("to be empty"),
-        peerDependencies: expect.it("to be empty"),
       }
     );
 
@@ -213,8 +213,6 @@ describe("Multiple installation jobs", () => {
       "to satisfy",
       {
         dependencies: { treediff: "0.1.0" },
-        devDependencies: expect.it("to be empty"),
-        peerDependencies: expect.it("to be empty"),
       }
     );
   });
