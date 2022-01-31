@@ -26,7 +26,7 @@ describe("Lazy install dependency", () => {
         >>> wait
 
         ? Select packages to affect: (Press <space> to select, <a> to toggle all, <i> to
-         invert selection)
+         invert selection, and <enter> to proceed)
         ❯◯ sub-package-a
          ◯ sub-package-b
 
