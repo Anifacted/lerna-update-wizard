@@ -36,13 +36,14 @@ module.exports = class SemverListPrompt extends Base {
           return this.render();
         case "left":
         case "right":
-          this.semverPrefix = this.prefixes[
-            cycle(
-              this.prefixes.length,
-              this.prefixes.indexOf(this.getSemverPrefix()),
-              keyName === "left"
-            )
-          ];
+          this.semverPrefix =
+            this.prefixes[
+              cycle(
+                this.prefixes.length,
+                this.prefixes.indexOf(this.getSemverPrefix()),
+                keyName === "left"
+              )
+            ];
           return this.render();
       }
     });

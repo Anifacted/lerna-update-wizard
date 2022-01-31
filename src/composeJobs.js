@@ -219,13 +219,12 @@ const createJobWizard = async ({
   }
   let targetVersionResolved = targetVersion;
 
-  const targetVersionLookup = (await runCommand(
-    `npm info ${targetDependency}@${targetVersion} version`,
-    {
+  const targetVersionLookup = (
+    await runCommand(`npm info ${targetDependency}@${targetVersion} version`, {
       startMessage: `Resolving dependency version for "${targetDependency}@${targetVersion}"`,
       logOutput: false,
-    }
-  )).trim();
+    })
+  ).trim();
 
   invariant(
     targetVersionLookup,
