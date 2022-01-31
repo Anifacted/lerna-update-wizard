@@ -1,7 +1,6 @@
 const Base = require("inquirer/lib/prompts/base");
 const observe = require("inquirer/lib/utils/events");
 const Paginator = require("inquirer/lib/utils/paginator");
-const cliCursor = require("cli-cursor");
 const chalk = require("chalk");
 
 const cycle = (length, currentIndex, backwards) =>
@@ -20,8 +19,6 @@ module.exports = class SemverListPrompt extends Base {
     this.selectedIndex = 0;
     this.semverPrefix = null;
     this.paginator = new Paginator(this.screen);
-
-    cliCursor.hide();
 
     const events = observe(this.rl);
 
@@ -81,7 +78,6 @@ module.exports = class SemverListPrompt extends Base {
     this.screen.render(
       `\nSelected version: ${chalk.white.bold(this.getValue())}\n`
     );
-    cliCursor.show();
     this.screen.done();
     this.done(this.getValue());
   }
