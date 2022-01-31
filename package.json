@@ -70,8 +70,7 @@
   "lint-staged": {
     "*.js": [
       "npm run format",
-      "npm run lint",
-      "git add"
+      "npm run lint"
     ]
   },
   "engines": {
