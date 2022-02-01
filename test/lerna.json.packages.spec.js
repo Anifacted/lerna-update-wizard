@@ -148,7 +148,7 @@ describe("lerna.json `packages` configuration", () => {
         >>> input ENTER
 
         ? Select packages to affect: (Press <space> to select, <a> to toggle all, <i> to
-        invert selection)
+        invert selection, and <enter> to proceed)
         ❯◉ sub-package-a (0.1.0)
 
         >>> input ENTER
@@ -213,7 +213,7 @@ describe("lerna.json `packages` configuration", () => {
         >>> input ENTER
 
         ? Select packages to affect: (Press <space> to select, <a> to toggle all, <i> to
-         invert selection)
+         invert selection, and <enter> to proceed)
         ❯◯ sub-package-default
          ◉ sub-package-foobarbaz (0.2.0)
          ◉ sub-package-myPackages (0.1.0)
