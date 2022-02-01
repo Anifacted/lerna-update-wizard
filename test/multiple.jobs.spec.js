@@ -40,7 +40,8 @@ describe("Multiple installation jobs", () => {
 
         >>> input SPACE
 
-        ? Select packages to affect:
+        ? Select packages to affect: (Press <space> to select, <a> to toggle all, <i> to
+          invert selection, and <enter> to proceed)
         ❯◉ my-app
          ◉ my-helpers (0.1.0)
          ◯ my-tools
