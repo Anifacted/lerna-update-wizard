@@ -17,7 +17,7 @@
   "dependencies": {
     "chalk": "^4.1.2",
     "execution-time": "^1.4.1",
-    "fs-extra": "^7.0.0",
+    "fs-extra": "^10.0.0",
     "globby": "^11.0.4",
     "inquirer": "^8.2.0",
     "inquirer-autocomplete-prompt": "^1.4.0",
