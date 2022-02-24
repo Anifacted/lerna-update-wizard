@@ -49,8 +49,8 @@
     "test": "jest --verbose --runInBand",
     "release": "node-publisher release",
     "ci": "npm run lint && npm test",
-    "lint": "eslint 'src/**/*.js' && prettier --check 'src/**/*.js'",
-    "format": "./node_modules/.bin/prettier --write 'src/**/*.js'",
+    "lint": "eslint src/**/*.js && prettier --check src/**/*.js",
+    "format": "prettier --write src/**/*.js",
     "lint-staged": "lint-staged"
   },
   "keywords": [
