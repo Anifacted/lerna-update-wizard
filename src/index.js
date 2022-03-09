@@ -5,6 +5,7 @@ const uniq = require("lodash/uniq");
 const orderBy = require("lodash/orderBy");
 const globby = require("globby");
 const perf = require("execution-time")();
+const normalize = require("normalize-path");
 
 const runCommand = require("./utils/runCommand");
 const fileExists = require("./utils/fileExists");
@@ -86,7 +87,9 @@ module.exports = async ({ input, flags }) => {
     : packagesConfig;
 
   const packagesRead = await globby(
-    defaultPackagesGlobs.map(glob => resolve(projectDir, glob, "package.json")),
+    defaultPackagesGlobs.map(glob => {
+      return normalize(resolve(projectDir, glob, "package.json"));
+    }),
     { expandDirectories: true }
   );
 
