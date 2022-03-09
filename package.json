@@ -24,6 +24,7 @@
     "lodash": "^4.17.21",
     "meow": "^9.0.0",
     "minimist": "^1.2.5",
+    "normalize-path": "^3.0.0",
     "semver-compare": "^1.0.0"
   },
   "devDependencies": {
@@ -36,7 +37,7 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^5.1.0",
     "jest": "^27.4.7",
-    "lint-staged": "^12.3.2",
+    "lint-staged": "^12.3.5",
     "node-publisher": "^2.0.0",
     "npm": "^6.14.16",
     "pre-commit": "^1.2.2",
@@ -49,8 +50,8 @@
     "test": "jest --verbose --runInBand",
     "release": "node-publisher release",
     "ci": "npm run lint && npm test",
-    "lint": "eslint 'src/**/*.js' && prettier --check 'src/**/*.js'",
-    "format": "./node_modules/.bin/prettier --write 'src/**/*.js'",
+    "lint": "eslint src/**/*.js && prettier --check src/**/*.js",
+    "format": "prettier --write src/**/*.js",
     "lint-staged": "lint-staged"
   },
   "keywords": [
