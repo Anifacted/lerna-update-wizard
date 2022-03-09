@@ -42,7 +42,7 @@
     "npm": "^6.14.16",
     "pre-commit": "^1.2.2",
     "prettier": "^2.5.1",
-    "sinon": "^11.1.2",
+    "sinon": "^13.0.1",
     "unexpected": "^12.0.3",
     "unexpected-sinon": "^11.0.1"
   },
