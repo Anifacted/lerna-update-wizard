@@ -7,7 +7,7 @@
     "src",
     "bin"
   ],
-  "version": "1.1.1",
+  "version": "1.1.2",
   "main": "index.js",
   "license": "MIT",
   "repository": {
@@ -22,7 +22,7 @@
     "inquirer": "^8.2.0",
     "inquirer-autocomplete-prompt": "^1.4.0",
     "lodash": "^4.17.21",
-    "meow": "^9.0.0",
+    "meow": "^10.1.2",
     "minimist": "^1.2.5",
     "normalize-path": "^3.0.0",
     "semver-compare": "^1.0.0"
@@ -32,12 +32,12 @@
     "eslint": "^8.0.1",
     "eslint-config-prettier": "^8.3.0",
     "eslint-config-standard": "^16.0.3",
-    "eslint-plugin-import": "^2.25.2",
+    "eslint-plugin-import": "^2.25.4",
     "eslint-plugin-mocha": "^10.0.3",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^5.1.0",
     "jest": "^27.4.7",
-    "lint-staged": "^12.3.2",
+    "lint-staged": "^12.3.5",
     "node-publisher": "^2.0.0",
     "npm": "^6.14.16",
     "pre-commit": "^1.2.2",
