@@ -1,3 +1,34 @@
+### v1.1.2 (2022-03-10)
+
+- [#152](https://github.com/Anifacted/lerna-update-wizard/pull/152) Bump eslint-plugin-import from 2.25.2 to 2.25.4 ([dependabot[bot]](mailto:49699333+dependabot[bot]@users.noreply.github.com))
+- [#158](https://github.com/Anifacted/lerna-update-wizard/pull/158) Bump lint-staged from 12.3.2 to 12.3.5 ([dependabot[bot]](mailto:49699333+dependabot[bot]@users.noreply.github.com))
+- [#153](https://github.com/Anifacted/lerna-update-wizard/pull/153) Bump sinon from 11.1.2 to 13.0.1 ([dependabot[bot]](mailto:49699333+dependabot[bot]@users.noreply.github.com))
+- [#156](https://github.com/Anifacted/lerna-update-wizard/pull/156) Fixes broken windows compatibility since upgrade to globby@v11 ([curvedriver](mailto:54622444+curvedriver@users.noreply.github.com))
+- [#149](https://github.com/Anifacted/lerna-update-wizard/pull/149) Bump eslint-plugin-mocha from 9.0.0 to 10.0.3 ([dependabot[bot]](mailto:49699333+dependabot[bot]@users.noreply.github.com))
+- [#145](https://github.com/Anifacted/lerna-update-wizard/pull/145) Bump jest from 27.2.5 to 27.4.7 ([dependabot[bot]](mailto:49699333+dependabot[bot]@users.noreply.github.com))
+- [#147](https://github.com/Anifacted/lerna-update-wizard/pull/147) Bump fs-extra from 7.0.1 to 10.0.0 ([dependabot[bot]](mailto:49699333+dependabot[bot]@users.noreply.github.com))
+
+### v1.1.1 (2022-02-01)
+
+#### Pull requests
+
+- [#150](https://github.com/Anifacted/lerna-update-wizard/pull/150) Upgrade inquirer to v8 ([Marc Høegh](mailto:mhoegh90@gmail.com))
+- [#148](https://github.com/Anifacted/lerna-update-wizard/pull/148) Lock npm version to 6 ([Marc Høegh](mailto:mhoegh90@gmail.com))
+- [#127](https://github.com/Anifacted/lerna-update-wizard/pull/127) Bump prettier from 1.18.2 to 2.5.1 ([Marc Høegh](mailto:mhoegh90@gmail.com), [dependabot[bot]](mailto:49699333+dependabot[bot]@users.noreply.github.com))
+- [#141](https://github.com/Anifacted/lerna-update-wizard/pull/141) Bump lint-staged from 11.2.3 to 12.3.2 ([Marc Høegh](mailto:mhoegh90@gmail.com), [dependabot[bot]](mailto:49699333+dependabot[bot]@users.noreply.github.com))
+- [#143](https://github.com/Anifacted/lerna-update-wizard/pull/143) Remove dependency: cli-cursor ([Marc Høegh](mailto:mhoegh90@gmail.com))
+- [#142](https://github.com/Anifacted/lerna-update-wizard/pull/142) Upgrade to package-lockfile v2 ([Marc Høegh](mailto:mhoegh90@gmail.com))
+- [#123](https://github.com/Anifacted/lerna-update-wizard/pull/123) Bump unexpected-sinon from 10.11.2 to 11.0.1 ([dependabot[bot]](mailto:49699333+dependabot[bot]@users.noreply.github.com))
+- [#121](https://github.com/Anifacted/lerna-update-wizard/pull/121)  ([dependabot[bot]](mailto:49699333+dependabot[bot]@users.noreply.github.com))
+- [#113](https://github.com/Anifacted/lerna-update-wizard/pull/113) Bump sinon from 6.3.5 to 11.1.2 ([dependabot[bot]](mailto:49699333+dependabot[bot]@users.noreply.github.com))
+- [#115](https://github.com/Anifacted/lerna-update-wizard/pull/115) Bump eslint from 8.0.0 to 8.0.1 ([dependabot[bot]](mailto:49699333+dependabot[bot]@users.noreply.github.com))
+- [#116](https://github.com/Anifacted/lerna-update-wizard/pull/116) Bump minimist from 1.2.3 to 1.2.5 ([dependabot[bot]](mailto:49699333+dependabot[bot]@users.noreply.github.com))
+- [#117](https://github.com/Anifacted/lerna-update-wizard/pull/117) Bump execution-time from 1.3.0 to 1.4.1 ([dependabot[bot]](mailto:49699333+dependabot[bot]@users.noreply.github.com))
+
+#### Commits to master
+
+- [Update changelog](https://github.com/Anifacted/lerna-update-wizard/commit/7f6c89b791b74c1b93450d1a98da5cf933c03d14) ([Marc Høegh](mailto:mhoegh90@gmail.com))
+
 ### v1.1.0 (2021-10-14)
 
 #### Pull requests
