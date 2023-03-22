@@ -34,6 +34,7 @@ describe("lerna.json `packages` configuration", () => {
     beforeEach(async () => {
       projectPath = await generateProject({
         ...projectConfig,
+        name: "project-b",
         workspaces: ["fooPackages/*"],
         packages: [
           {
@@ -83,6 +84,7 @@ describe("lerna.json `packages` configuration", () => {
     beforeEach(async () => {
       projectPath = await generateProject({
         ...projectConfig,
+        name: "project-c",
         workspaces: { packages: ["fooPackages/*"] },
         packages: [
           {
@@ -132,6 +134,7 @@ describe("lerna.json `packages` configuration", () => {
     beforeEach(async () => {
       projectPath = await generateProject({
         ...projectConfig,
+        name: "project-d",
         lernaJson: {
           packages: ["myPackages/*"],
         },

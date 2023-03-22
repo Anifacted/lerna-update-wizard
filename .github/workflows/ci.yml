@@ -4,41 +4,39 @@ on: [push]
 
 jobs:
   lint:
-
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Use Node.js 14.x
-      uses: actions/setup-node@v1
-      with:
-        node-version: 14.x
-    - run: npm install
-    - name: Lint
-      run: npm run lint
-      env:
-        CI: true
+      - uses: actions/checkout@v2
+      - name: Use Node.js 16.x
+        uses: actions/setup-node@v1
+        with:
+          node-version: 16.x
+      - run: npm install
+      - name: Lint
+        run: npm run lint
+        env:
+          CI: true
 
   test:
-
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
-        node-version: [12.x, 14.x]
+        node-version: [16.x]
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v1
-      with:
-        node-version: ${{ matrix.node-version }}
-    - run: npm install
-    - name: Test
-      run: |
-        git config --global init.defaultBranch master
-        git config --global user.name ${GITHUB_ACTOR}
-        git config --global user.email `git show -s --format='%ae'`
-        npm test
-      env:
-        CI: true
+      - uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      - run: npm install
+      - name: Test
+        run: |
+          git config --global init.defaultBranch master
+          git config --global user.name ${GITHUB_ACTOR}
+          git config --global user.email `git show -s --format='%ae'`
+          npm test
+        env:
+          CI: true
